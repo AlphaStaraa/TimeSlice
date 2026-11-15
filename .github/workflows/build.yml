@@ -59,6 +59,11 @@ jobs:
       - uses: ilammy/msvc-dev-cmd@v1
         if: runner.os == 'Windows'
       - run: python -m pip install -r requirements.txt
+      - name: Install Linux graphics libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libopengl0 libgl1
       - run: python tools/check_desktop.py --cpu-only
       - run: python tools/golden.py
       - run: python tools/check_utf8_export.py
