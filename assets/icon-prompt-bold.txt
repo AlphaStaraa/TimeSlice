@@ -1,0 +1,5 @@
+Mode: built-in image_gen, image edit.
+Reference: assets/app-icon.png
+Final asset: assets/app-icon-bold.png
+
+Use case: logo-brand. Edit this application icon for 时刃 to be substantially more striking and bold. Preserve transparent exterior, rounded obsidian square tile, face-on perspective, centered aperture symbol and no text. Replace the visually busy narrow aperture blades with a massive sculptural broken titanium time-ring, two strong interlocking angular halves torn apart by a broad razor-sharp diagonal cyan-white time fissure. A vivid sunset orange inner glow on the upper-left half meets electric icy cyan on the lower-right, slightly offset halves and a small dramatic light flare where the cut crosses the center. Stronger silhouette, larger simple shapes, unmistakable at 32px; premium movie-title / industrial sci-fi energy, extraordinary but controlled. Deep near-black negative space. High contrast brushed-metal edges. No extra symbols, no letters, no clock numbers, no sword, no particles clutter. One standalone square desktop app icon.

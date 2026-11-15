@@ -1,0 +1,26 @@
+[
+  {
+    "id": 407, "key": "silk", "name": "昼夜绸带", "family": 3, "shape": 0,
+    "description": "蜿蜒的昼夜条带沿画面流过",
+    "slices": 12, "duration": 6, "cycles": 1, "span": 0.8, "pixel": false,
+    "origin": 4, "turns": 0, "reference": false
+  },
+  {
+    "id": 408, "key": "honeycomb", "name": "时晶蜂巢", "family": 3, "shape": 8,
+    "description": "六边晶格沿同一方向逐片点亮",
+    "slices": 54, "duration": 6, "cycles": 1, "span": 0.9, "pixel": false,
+    "origin": 4, "turns": 0, "reference": false
+  },
+  {
+    "id": 409, "key": "binary", "name": "双星轨道", "family": 3, "shape": 5,
+    "description": "两个焦点牵引一圈圈椭圆时间带",
+    "slices": 15, "duration": 6, "cycles": 1, "span": 0.9, "pixel": false,
+    "origin": 4, "turns": 0, "reference": false
+  },
+  {
+    "id": 410, "key": "film", "name": "时间胶片", "family": 3, "shape": 8,
+    "description": "三行错时画格在同一场景里滑行",
+    "slices": 15, "duration": 6, "cycles": 1, "span": 0.85, "pixel": false,
+    "origin": 4, "turns": 0, "reference": false
+  }
+]

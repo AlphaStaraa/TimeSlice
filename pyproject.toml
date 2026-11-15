@@ -1,0 +1,23 @@
+[tool.ruff]
+required-version = "==0.17.5"
+target-version = "py311"
+line-length = 100
+include = ["*.py", "pyproject.toml"]
+extend-exclude = ["legacy", "build", "dist", "GitHub发布", "GitHub准备", "维护记录", "promo-video", "design-review", ".venv", "mobile/build", "mobile/dist"]
+
+[tool.ruff.lint]
+select = ["E4", "E5", "E7", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/desktop/*.py" = ["E402"]
+"mobile/tests/*.py" = ["E402"]
+"app/main.py" = ["E402"]
+"mac-5.0-redesign/main.py" = ["E402"]
+"lite/main.py" = ["E402"]
+"tools/check_freeze_spacing.py" = ["E402"]
+"tools/make_mac_thumbnails.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+

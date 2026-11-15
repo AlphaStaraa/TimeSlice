@@ -1,0 +1,23 @@
+{
+  "name": "时刃",
+  "version": "1.0.3-android-preview.3",
+  "displayVersion": "1.0.3 视频切片预览",
+  "build": 103,
+  "author": "AlphaStar",
+  "license": "AGPL-3.0-only",
+  "price": 0,
+  "effects": 46,
+  "catalogueEntries": 35,
+  "sourceAvailable": true,
+  "openSource": true,
+  "englishName": "TimeSlice",
+  "releaseChannel": "preview",
+  "baseline": "1.0.0 render core",
+  "gpuGrade": true,
+  "activePlatforms": [
+    "macOS",
+    "Windows",
+    "Android"
+  ],
+  "platform": "Android"
+}

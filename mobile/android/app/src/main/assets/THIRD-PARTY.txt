@@ -1,0 +1,6 @@
+时刃手机预览版
+原生切片核心由本项目实现；系统媒体功能使用 Android MediaCodec/MediaMuxer。
+兼容软件编码使用 JCodec 0.2.5（BSD-2-Clause / FreeBSD License）。完整许可见 JCODEC-LICENSE.txt。
+上游：https://github.com/jcodec/jcodec
+来源：Maven Central org.jcodec:jcodec:0.2.5；构建时已校验官方 SHA1。
+兼容编码使用明确的 Rec.709 色彩标记，独立于手机的系统编码器。

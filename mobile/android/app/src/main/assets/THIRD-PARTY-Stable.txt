@@ -1,0 +1,7 @@
+TimeSlice · AlphaStar
+自有代码：AGPL-3.0-only，完整源码随正式版提供。
+OpenCV Android 4.13.0：Apache-2.0；官方Maven AAR，无本地修改。
+OpenCV及可能包含的第三方组件声明见OpenCV-LICENSE.txt、OpenCV-3RD-PARTY-NOTICES.txt。后者保留同版本上游发行包提供的完整第三方声明，可能包含本Android构建未使用的组件。
+LLVM/libc++及工具链运行库：Apache-2.0 with LLVM exceptions，见LLVM-RUNTIME-NOTICE.txt。
+JCodec 0.2.5：BSD-2-Clause，见JCODEC-LICENSE.txt。
+App系统字体不随安装包再分发。素材及图片的权利归各自权利人。

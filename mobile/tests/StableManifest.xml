@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="studio.timeslice.stabletest">
+ <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36"/>
+ <application android:label="TimeSlice validation"/>
+ <instrumentation android:name="studio.shiren.mobile.StableInstrumentation" android:targetPackage="studio.shiren.mobile" android:functionalTest="true"/>
+ <instrumentation android:name="studio.shiren.mobile.UiDesignInstrumentation" android:targetPackage="studio.shiren.mobile" android:functionalTest="true"/>
+ <instrumentation android:name="studio.shiren.mobile.PhysicalInstrumentation" android:targetPackage="studio.shiren.mobile" android:functionalTest="true"/>
+ <instrumentation android:name="studio.shiren.mobile.UiReviewInstrumentation" android:targetPackage="studio.shiren.mobile" android:functionalTest="true"/>
+</manifest>

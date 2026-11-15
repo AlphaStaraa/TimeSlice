@@ -1,0 +1,189 @@
+[
+  {
+    "key": "stripes",
+    "name": "条形",
+    "default": 2,
+    "variants": [
+      {
+        "effect": 2,
+        "motion": "错时流动",
+        "orientation": "竖向"
+      },
+      {
+        "effect": 1,
+        "motion": "错时流动",
+        "orientation": "横向"
+      },
+      {
+        "effect": 3,
+        "motion": "错时流动",
+        "orientation": "斜向"
+      },
+      {
+        "effect": 304,
+        "motion": "波纹传播",
+        "orientation": "竖向"
+      },
+      {
+        "effect": 303,
+        "motion": "波纹传播",
+        "orientation": "横向"
+      },
+      {
+        "effect": 305,
+        "motion": "波纹传播",
+        "orientation": "斜向"
+      },
+      {
+        "effect": 208,
+        "motion": "交错往返",
+        "orientation": "竖向"
+      }
+    ]
+  },
+  {
+    "key": "fan",
+    "name": "扇形",
+    "default": 201,
+    "variants": [
+      {
+        "effect": 201,
+        "motion": "错时流动",
+        "orientation": ""
+      },
+      {
+        "effect": 302,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "circle",
+    "name": "圆形波纹",
+    "default": 300,
+    "variants": [
+      {
+        "effect": 202,
+        "motion": "错时流动",
+        "orientation": ""
+      },
+      {
+        "effect": 300,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "arc",
+    "name": "弧形波纹",
+    "default": 301,
+    "variants": [
+      {
+        "effect": 301,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "diamond",
+    "name": "菱形",
+    "default": 5,
+    "variants": [
+      {
+        "effect": 5,
+        "motion": "错时流动",
+        "orientation": ""
+      },
+      {
+        "effect": 306,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "box",
+    "name": "套框",
+    "default": 205,
+    "variants": [
+      {
+        "effect": 205,
+        "motion": "错时流动",
+        "orientation": ""
+      },
+      {
+        "effect": 307,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "rotate",
+    "name": "旋转",
+    "default": 0,
+    "variants": [
+      {
+        "effect": 0,
+        "motion": "错时流动",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "grid",
+    "name": "棋盘",
+    "default": 206,
+    "variants": [
+      {
+        "effect": 206,
+        "motion": "错时流动",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "triangle",
+    "name": "三角",
+    "default": 207,
+    "variants": [
+      {
+        "effect": 207,
+        "motion": "错时流动",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "zigzag",
+    "name": "折线",
+    "default": 209,
+    "variants": [
+      {
+        "effect": 209,
+        "motion": "错时流动",
+        "orientation": ""
+      },
+      {
+        "effect": 308,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  },
+  {
+    "key": "star",
+    "name": "星芒",
+    "default": 309,
+    "variants": [
+      {
+        "effect": 309,
+        "motion": "波纹传播",
+        "orientation": ""
+      }
+    ]
+  }
+]

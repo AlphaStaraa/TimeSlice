@@ -1,0 +1,56 @@
+{
+  "version": "9.0.2",
+  "arguments": [
+    "./configure",
+    "--prefix=${PROJECT_ROOT}/build/lite/ffmpeg",
+    "--disable-everything",
+    "--disable-autodetect",
+    "--disable-network",
+    "--disable-doc",
+    "--disable-debug",
+    "--disable-ffplay",
+    "--disable-ffprobe",
+    "--disable-shared",
+    "--enable-static",
+    "--enable-small",
+    "--enable-gpl",
+    "--enable-libx264",
+    "--enable-zlib",
+    "--enable-videotoolbox",
+    "--enable-audiotoolbox",
+    "--enable-pthreads",
+    "--pkg-config=${PROJECT_ROOT}/build/lite/dependencies/prefix/bin/pkgconf",
+    "--pkg-config-flags=--static",
+    "--extra-cflags=-mmacosx-version-min=14.0 -I${PROJECT_ROOT}/build/lite/dependencies/prefix/include",
+    "--extra-ldflags=-mmacosx-version-min=14.0 -L${PROJECT_ROOT}/build/lite/dependencies/prefix/lib",
+    "--enable-protocol=file,pipe",
+    "--enable-demuxer=mov,matroska,avi,h264,hevc,mpegvideo,mpegps,mpegts,aac,mp3,wav,image2,rawvideo,flac,ogg",
+    "--enable-muxer=mp4,mov,matroska,rawvideo,null,framemd5,wav",
+    "--enable-decoder=h264,hevc,mpeg4,prores,mjpeg,png,vp8,vp9,aac,mp3,pcm_s16le,pcm_s24le,pcm_s32le,pcm_f32le,alac,flac,opus,vorbis,rawvideo,wrapped_avframe",
+    "--enable-encoder=libx264,h264_videotoolbox,hevc_videotoolbox,aac,rawvideo,pcm_s16le,wrapped_avframe",
+    "--enable-parser=h264,hevc,mpeg4video,mpegaudio,aac,vorbis,opus,vp8,vp9,png,flac",
+    "--enable-bsf=h264_mp4toannexb,hevc_mp4toannexb,extract_extradata,aac_adtstoasc",
+    "--enable-filter=fps,scale,format,aresample,apad,trim,setpts,atrim,asetpts,transpose,hflip,vflip,color,testsrc2,null,anull,abuffer,buffer,buffersink,abuffersink",
+    "--enable-indev=lavfi",
+    "--enable-hwaccel=h264_videotoolbox,hevc_videotoolbox"
+  ],
+  "binarySha256": "5c5d61d932e09dd374afab7918dcab52558ce04aa00873f16acb939cc35518a6",
+  "bytes": 6479752,
+  "sources": [
+    {
+      "name": "ffmpeg-9.0.2.tar.xz",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+      "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e"
+    },
+    {
+      "name": "x264-stable.tar.bz2",
+      "url": "https://code.videolan.org/videolan/x264/-/archive/stable/x264-stable.tar.bz2",
+      "sha256": "740126cb48549ca4e2f09b4ae13beed592d5b54744044e38f28662fd96d0ba56"
+    },
+    {
+      "name": "pkgconf-2.5.1.tar.xz",
+      "url": "https://distfiles.ariadne.space/pkgconf/pkgconf-2.5.1.tar.xz",
+      "sha256": "cd05c9589b9f86ecf044c10a2269822bc9eb001eced2582cfffd658b0a50c243"
+    }
+  ]
+}

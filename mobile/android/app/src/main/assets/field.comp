@@ -1,0 +1,4103 @@
+#version 310 es
+precision highp float;
+precision highp int;
+
+layout(std430, binding = 1) readonly buffer StructuredBuffer_uint_t_0 {
+    uint _data[];
+} cfg_0;
+
+struct TFParams_0
+{
+    float outTime_0;
+    float u_0;
+    float sourceDuration_0;
+    float aspect_0;
+    float slices_0;
+    float pixel_0;
+    float span_0;
+    float cycles_0;
+    float cx_0;
+    float cy_0;
+    float angle_0;
+    float turns_0;
+    float build_0;
+    float softness_0;
+    float density_0;
+    float sourceReverse_0;
+    float sourceStart_0;
+    float sourceEnd_0;
+    float outputW_0;
+    float outputH_0;
+    uint family_0;
+    uint shape_0;
+    uint design_0;
+    uint ending_0;
+    uint direction_0;
+    uint playback_0;
+    uint origin_0;
+    uint viewMode_0;
+    uint frames_0;
+    uint customMap_0;
+    uint waveSources_0;
+    uint flags_0;
+    float shadowStrength_0;
+    float shadowWidth_0;
+    float shadowSoftness_0;
+    float shadowSide_0;
+    float sampleW_0;
+    float sampleH_0;
+    float reserved0_0;
+    float reserved1_0;
+};
+
+
+layout(binding = 0)
+layout(std140) uniform block_TFParams_0
+{
+    float outTime_0;
+    float u_0;
+    float sourceDuration_0;
+    float aspect_0;
+    float slices_0;
+    float pixel_0;
+    float span_0;
+    float cycles_0;
+    float cx_0;
+    float cy_0;
+    float angle_0;
+    float turns_0;
+    float build_0;
+    float softness_0;
+    float density_0;
+    float sourceReverse_0;
+    float sourceStart_0;
+    float sourceEnd_0;
+    float outputW_0;
+    float outputH_0;
+    uint family_0;
+    uint shape_0;
+    uint design_0;
+    uint ending_0;
+    uint direction_0;
+    uint playback_0;
+    uint origin_0;
+    uint viewMode_0;
+    uint frames_0;
+    uint customMap_0;
+    uint waveSources_0;
+    uint flags_0;
+    float shadowStrength_0;
+    float shadowWidth_0;
+    float shadowSoftness_0;
+    float shadowSide_0;
+    float sampleW_0;
+    float sampleH_0;
+    float reserved0_0;
+    float reserved1_0;
+}param_0;
+
+layout(std430, binding = 3) readonly buffer StructuredBuffer_float_t_0 {
+    float _data[];
+} timeMap_0;
+
+layout(std430, binding = 5) buffer StructuredBuffer_vectorx3Cfloatx2C4x3E_t_0 {
+    vec4 _data[];
+} diagnostics_0;
+
+float bounce3_0(float x_0)
+{
+
+    return 1.0 - abs(2.0 * fract(x_0 * 0.5) - 1.0);
+}
+
+
+struct Field_0
+{
+    float a_0;
+    float b_0;
+    float weight_0;
+    float shade_0;
+    vec2 uvA_0;
+    vec2 uvB_0;
+    float light_0;
+};
+
+
+Field_0 single3_0(vec2 uv_0, float t_0)
+{
+
+    Field_0 f_0;
+
+    f_0.a_0 = t_0;
+
+    f_0.b_0 = t_0;
+
+    f_0.weight_0 = 0.0;
+
+    f_0.shade_0 = 1.0;
+
+    f_0.uvA_0 = uv_0;
+
+    f_0.uvB_0 = uv_0;
+
+    f_0.light_0 = 1.0;
+
+    return f_0;
+}
+
+
+float creativeAxis42_0(float q_0, uint direction_1)
+{
+
+    if(direction_1 == 1U)
+    {
+
+        return 1.0 - q_0;
+    }
+
+    if(direction_1 >= 2U)
+    {
+
+        float _S1 = abs(q_0 - 0.5) * 2.0;
+
+        float _S2;
+        if(direction_1 == 3U)
+        {
+
+            _S2 = 1.0 - _S1;
+
+        }
+        else
+        {
+
+            _S2 = _S1;
+
+        }
+
+        return _S2;
+    }
+    return q_0;
+}
+
+
+float shadowArea42_0(float distance_0, float solid_0, float feather_0)
+{
+
+    float _S3 = max(0.0, distance_0);
+    float t_1 = clamp((_S3 - solid_0) / feather_0, 0.0, 1.0);
+    return min(_S3, solid_0) + feather_0 * t_1 * (1.0 - t_1 * t_1 * (1.0 - 0.5 * t_1));
+}
+
+float repeatedShadowArea42_0(float distance_1, float solid_1, float feather_1)
+{
+
+    return floor(distance_1) * (solid_1 + 0.5 * feather_1) + shadowArea42_0(fract(distance_1), solid_1, feather_1);
+}
+
+
+vec2 rot3_0(vec2 v_0, float a_1)
+{
+
+    float _S4 = cos(a_1);
+
+    float _S5 = v_0.x;
+
+    float _S6 = sin(a_1);
+
+    float _S7 = v_0.y;
+
+    return vec2(_S4 * _S5 + _S6 * _S7, - _S6 * _S5 + _S4 * _S7);
+}
+
+
+
+float axisAngle3_0(float y_0, float x_1)
+{
+
+    float _S8 = abs(x_1);
+
+    float _S9 = abs(y_0);
+
+    if((_S8 + _S9) < 9.99999997475242708e-07)
+    {
+
+        return 0.0;
+    }
+
+    float _S10;
+    if(_S9 < 9.99999997475242708e-07)
+    {
+
+        if(x_1 < 0.0)
+        {
+
+            _S10 = 3.1415927410125732;
+
+        }
+        else
+        {
+
+            _S10 = 0.0;
+
+        }
+
+        return _S10;
+    }
+
+    if(_S8 < 9.99999997475242708e-07)
+    {
+
+        if(y_0 > 0.0)
+        {
+
+            _S10 = 1.5707963705062866;
+
+        }
+        else
+        {
+
+            _S10 = -1.5707963705062866;
+
+        }
+
+        return _S10;
+    }
+
+    return (atan((y_0),(x_1)));
+}
+
+
+vec2 gridSize3_0(float n_0, vec2 size_0)
+{
+
+    float _S11 = size_0.y;
+
+    float rows_0 = clamp(round(sqrt(n_0 * _S11 / size_0.x)), 1.0, min(_S11, n_0));
+
+    return vec2(floor(n_0 / rows_0), rows_0);
+}
+
+
+bool isStripe42_0(TFParams_0 p_0)
+{
+
+    bool _S12;
+    if((p_0.customMap_0) == 0U)
+    {
+
+        _S12 = (p_0.direction_0) < 2U;
+
+    }
+    else
+    {
+
+        _S12 = false;
+
+    }
+
+    if(_S12)
+    {
+
+        if((p_0.shape_0) == 0U)
+        {
+
+            _S12 = true;
+
+        }
+        else
+        {
+
+            _S12 = (p_0.shape_0) == 1U;
+
+        }
+
+        if(_S12)
+        {
+
+            _S12 = true;
+
+        }
+        else
+        {
+
+            _S12 = (p_0.shape_0) == 11U;
+
+        }
+
+    }
+    else
+    {
+
+        _S12 = false;
+
+    }
+
+    return _S12;
+}
+
+
+float rasterStripeIndex42_0(float pixel_1, float lengthPx_0, float count_0)
+{
+    if((max(lengthPx_0, count_0)) <= 32768.0)
+    {
+
+        uint index_0 = (2U * uint(pixel_1) + 1U) * uint(count_0) / (2U * uint(lengthPx_0));
+        return min(float(index_0), count_0 - 1.0);
+    }
+    return min(floor((pixel_1 + 0.5) * count_0 / lengthPx_0), count_0 - 1.0);
+}
+
+
+struct Coord_0
+{
+    float raw_0;
+    float q_1;
+    float index_1;
+    float coverage_0;
+    vec2 cell_0;
+    vec2 frac_0;
+};
+
+
+Coord_0 coordinate3_0(vec2 uv_1, TFParams_0 p_1, float mapValue_0)
+{
+
+    Coord_0 c_0;
+
+    vec2 _S13 = vec2(ivec2(0));
+
+    c_0.cell_0 = _S13;
+
+    c_0.frac_0 = _S13;
+
+    c_0.index_1 = 0.0;
+
+    c_0.coverage_0 = 1.0;
+
+    float _S14 = uv_1.x;
+
+    float _S15 = max(2.0, p_1.slices_0);
+    vec2 dim_0 = vec2(p_1.outputW_0, p_1.outputH_0);
+
+    vec2 _S16 = vec2(p_1.cx_0, p_1.cy_0);
+
+    vec2 v_1 = (uv_1 - _S16) * dim_0;
+    vec2 radii_0 = max(_S16, 1.0 - _S16) * dim_0;
+    float _S17 = max(length(radii_0), 1.0);
+
+    float rmin_0 = length(max(_S13, max(- _S16, _S16 - 1.0)) * dim_0);
+
+    float q_2;
+
+    float lengthPx_1;
+
+    int _S18;
+
+    bool _S19;
+    switch(p_1.shape_0)
+    {
+    case 0U:
+        {
+
+            q_2 = _S14;
+            break;
+        }
+    case 1U:
+        {
+
+            q_2 = uv_1.y;
+            break;
+        }
+    case 2U:
+    case 12U:
+        {
+
+            float a_2 = p_1.angle_0 * 3.1415927410125732 / 180.0;
+
+            float _S20 = cos(a_2);
+
+            float _S21 = sin(a_2);
+
+            float _S22 = p_1.outputW_0 * _S20;
+
+            float _S23 = p_1.outputH_0 * _S21;
+
+            float q_3 = (dot(uv_1 * dim_0, vec2(_S20, _S21)) - (min(0.0, _S22) + min(0.0, _S23))) / max(1.0, abs(_S22) + abs(_S23));
+
+            if((p_1.shape_0) == 12U)
+            {
+
+                q_2 = q_3 + 0.070000000298023224 * (2.0 * abs(2.0 * fract(uv_1.y * 6.0) - 1.0) - 1.0);
+
+            }
+            else
+            {
+
+                q_2 = q_3;
+
+            }
+
+            break;
+        }
+    case 3U:
+        {
+
+            switch(p_1.origin_0)
+            {
+            case 1U:
+                {
+
+                    q_2 = axisAngle3_0(v_1.y, v_1.x);
+
+                    break;
+                }
+            case 2U:
+                {
+
+                    q_2 = axisAngle3_0(v_1.x, - v_1.y);
+
+                    break;
+                }
+            case 3U:
+                {
+
+                    q_2 = axisAngle3_0(- v_1.x, v_1.y);
+
+                    break;
+                }
+            default:
+                {
+
+                    q_2 = axisAngle3_0(- v_1.y, - v_1.x);
+
+                    break;
+                }
+            }
+
+            if(q_2 >= 0.0)
+            {
+
+                _S19 = q_2 <= 3.1415927410125732;
+
+            }
+            else
+            {
+
+                _S19 = false;
+
+            }
+
+            if(_S19)
+            {
+
+                _S18 = 1;
+
+            }
+            else
+            {
+
+                _S18 = 0;
+
+            }
+
+            c_0.coverage_0 = float(_S18);
+
+            q_2 = clamp(q_2 / 3.1415927410125732, 0.0, 1.0);
+
+            break;
+        }
+    case 4U:
+        {
+            float startAngle_0 = p_1.angle_0 / 360.0;
+
+
+
+            float _S24 = v_1.x;
+
+            float _S25 = v_1.y;
+
+            float _S26 = axisAngle3_0(_S24, - _S25);
+
+
+            float _S27 = abs(_S24);
+
+            float _S28 = abs(_S25);
+
+            if((_S27 + _S28) < 9.99999997475242708e-07)
+            {
+
+                q_2 = 0.0;
+
+            }
+            else
+            {
+
+                if(_S28 < 9.99999997475242708e-07)
+                {
+
+                    if(_S24 > 0.0)
+                    {
+
+                        q_2 = 1.5707963705062866;
+
+                    }
+                    else
+                    {
+
+                        q_2 = -1.5707963705062866;
+
+                    }
+
+                }
+                else
+                {
+
+                    if(_S27 < 9.99999997475242708e-07)
+                    {
+
+                        if(_S25 < 0.0)
+                        {
+
+                            q_2 = 0.0;
+
+                        }
+                        else
+                        {
+
+                            q_2 = 3.1415927410125732;
+
+                        }
+
+                    }
+                    else
+                    {
+
+                        q_2 = _S26;
+
+                    }
+
+                }
+
+            }
+
+            q_2 = fract(q_2 / 6.2831854820251465 + 1.0 - p_1.turns_0 * p_1.u_0 - startAngle_0);
+
+
+
+            break;
+        }
+    case 5U:
+    case 14U:
+        {
+
+            q_2 = (length(v_1) - rmin_0) / max(1.0, _S17 - rmin_0);
+
+            break;
+        }
+    case 6U:
+    case 7U:
+        {
+
+            vec2 vr_0 = rot3_0(v_1, p_1.angle_0 * 3.1415927410125732 / 180.0 + p_1.turns_0 * 2.0 * 3.1415927410125732 * p_1.u_0);
+            if((p_1.shape_0) == 6U)
+            {
+
+                q_2 = (abs(vr_0.x) + abs(vr_0.y)) / max(1.0, radii_0.x + radii_0.y);
+
+            }
+            else
+            {
+
+                q_2 = max(abs(vr_0.x) / max(radii_0.x, 1.0), abs(vr_0.y) / max(radii_0.y, 1.0));
+
+            }
+
+            break;
+        }
+    case 8U:
+    case 10U:
+        {
+
+            bool _S29 = (p_1.shape_0) == 10U;
+
+            if(_S29)
+            {
+
+                q_2 = max(1.0, ceil(_S15 / 2.0));
+
+            }
+            else
+            {
+
+                q_2 = _S15;
+
+            }
+            vec2 gs_0 = gridSize3_0(q_2, dim_0);
+
+            float _S30 = gs_0.y;
+
+            float _S31 = uv_1.y * _S30;
+
+            float _S32 = min(floor(_S31), _S30 - 1.0);
+
+            float _S33 = gs_0.x;
+
+            float extra_0 = q_2 - _S33 * _S30;
+            if(_S32 < extra_0)
+            {
+
+                _S18 = 1;
+
+            }
+            else
+            {
+
+                _S18 = 0;
+
+            }
+
+            float cols_0 = _S33 + float(_S18);
+
+            float _S34 = _S14 * cols_0;
+
+            float _S35 = min(floor(_S34), cols_0 - 1.0);
+            float index_2 = _S32 * _S33 + min(_S32, extra_0) + _S35;
+
+            c_0.cell_0 = vec2(_S35, _S32);
+
+            c_0.frac_0 = fract(vec2(_S34, _S31));
+            if(_S29)
+            {
+
+                float _S36 = _S15 - 1.0;
+
+                float _S37 = index_2 * 2.0;
+
+                if((c_0.frac_0.x + c_0.frac_0.y) >= 1.0)
+                {
+
+                    _S18 = 1;
+
+                }
+                else
+                {
+
+                    _S18 = 0;
+
+                }
+
+                lengthPx_1 = min(_S36, _S37 + float(_S18));
+
+            }
+            else
+            {
+
+                lengthPx_1 = index_2;
+
+            }
+
+            q_2 = lengthPx_1 / max(1.0, _S15 - 1.0);
+            break;
+        }
+    case 9U:
+        {
+
+            q_2 = fract(axisAngle3_0(v_1.y, v_1.x) / 6.2831854820251465 + 0.5 + 1.5 * (length(v_1) / _S17));
+
+            break;
+        }
+    case 11U:
+        {
+
+            q_2 = _S14;
+            break;
+        }
+    case 13U:
+        {
+
+            q_2 = length(v_1) / max(1.0, _S17 * (0.77999997138977051 + 0.2199999988079071 * cos(5.0 * axisAngle3_0(v_1.y, v_1.x))));
+            break;
+        }
+    default:
+        {
+
+            q_2 = _S14;
+
+            break;
+        }
+    }
+
+    if((p_1.customMap_0) != 0U)
+    {
+
+        c_0.coverage_0 = 1.0;
+
+        q_2 = mapValue_0;
+
+    }
+    float q_4 = clamp(q_2, 0.0, 1.0);
+    bool _S38 = (p_1.direction_0) == 1U;
+
+    if(_S38)
+    {
+
+        q_2 = 1.0 - q_4;
+
+    }
+    else
+    {
+
+        q_2 = q_4;
+
+    }
+    if((p_1.direction_0) >= 2U)
+    {
+
+        if((p_1.shape_0) == 8U)
+        {
+
+            _S19 = true;
+
+        }
+        else
+        {
+
+            _S19 = (p_1.shape_0) == 10U;
+
+        }
+
+        if(_S19)
+        {
+
+            q_2 = max(abs(_S14 - 0.5), abs(uv_1.y - 0.5)) * 2.0;
+
+        }
+        else
+        {
+
+            q_2 = abs(q_2 - 0.5) * 2.0;
+
+        }
+
+        if((p_1.direction_0) == 3U)
+        {
+
+            q_2 = 1.0 - q_2;
+
+        }
+
+    }
+
+    c_0.raw_0 = q_2;
+
+    float _S39 = q_2 * _S15;
+
+    float _S40 = _S15 - 1.0;
+
+    c_0.index_1 = min(floor(_S39), _S40);
+
+
+
+    float edge_0 = round(_S39);
+    if((abs(_S39 - edge_0)) < 9.9999997473787516e-05)
+    {
+
+        c_0.raw_0 = edge_0 / _S15;
+
+        c_0.index_1 = min(edge_0, _S40);
+
+    }
+
+
+
+    if(isStripe42_0(p_1))
+    {
+
+        _S19 = (p_1.reserved0_0) <= 0.0;
+
+    }
+    else
+    {
+
+        _S19 = false;
+
+    }
+
+    if(_S19)
+    {
+
+
+        bool _S41 = (p_1.shape_0) == 1U;
+
+        if(_S41)
+        {
+
+            lengthPx_1 = p_1.sampleH_0;
+
+        }
+        else
+        {
+
+            lengthPx_1 = p_1.sampleW_0;
+
+        }
+
+        float _S42;
+        if(_S41)
+        {
+
+            _S42 = uv_1.y;
+
+        }
+        else
+        {
+
+            _S42 = _S14;
+
+        }
+
+        float pixel_2 = floor(_S42 * lengthPx_1);
+        if(_S38)
+        {
+
+            _S42 = lengthPx_1 - 1.0 - pixel_2;
+
+        }
+        else
+        {
+
+            _S42 = pixel_2;
+
+        }
+
+        float _S43 = rasterStripeIndex42_0(_S42, lengthPx_1, _S15);
+
+        c_0.index_1 = _S43;
+
+    }
+
+    if((p_1.pixel_0) > 0.0)
+    {
+    }
+    else
+    {
+
+        q_2 = c_0.index_1 / _S40;
+
+    }
+
+    c_0.q_1 = q_2;
+    return c_0;
+}
+
+
+float play3_0(float x_2, uint mode_0)
+{
+
+    float _S44;
+
+    if(mode_0 == 0U)
+    {
+
+        _S44 = clamp(x_2, 0.0, 1.0);
+
+    }
+    else
+    {
+
+        if(mode_0 == 2U)
+        {
+
+            _S44 = fract(x_2);
+
+        }
+        else
+        {
+
+            _S44 = bounce3_0(x_2);
+
+        }
+
+    }
+
+    return _S44;
+}
+
+
+float coordSpan42_0(vec2 uv_2, TFParams_0 p_2)
+{
+
+    vec2 size_1 = vec2(p_2.sampleW_0, p_2.sampleH_0);
+    vec2 _S45 = vec2(p_2.cx_0, p_2.cy_0);
+
+    vec2 v_2 = (uv_2 - _S45) * size_1;
+    vec2 radii_1 = max(_S45, 1.0 - _S45) * size_1;
+    if((p_2.customMap_0) != 0U)
+    {
+
+        return min(p_2.sampleW_0, p_2.sampleH_0);
+    }
+
+    switch(p_2.shape_0)
+    {
+    case 1U:
+        {
+
+            return p_2.sampleH_0;
+        }
+    case 2U:
+    case 12U:
+        {
+
+            float a_3 = p_2.angle_0 * 3.1415927410125732 / 180.0;
+            return p_2.sampleW_0 * abs(cos(a_3)) + p_2.sampleH_0 * abs(sin(a_3));
+        }
+    case 3U:
+        {
+
+            return 3.1415927410125732 * length(v_2);
+        }
+    case 4U:
+        {
+
+            return 6.2831854820251465 * length(v_2);
+        }
+    case 5U:
+    case 14U:
+        {
+
+            return length(radii_1) - length(max(vec2(ivec2(0)), max(- _S45, _S45 - 1.0)) * size_1);
+        }
+    case 6U:
+        {
+
+            return (radii_1.x + radii_1.y) * 0.70710700750350952;
+        }
+    case 7U:
+        {
+
+            return min(radii_1.x, radii_1.y);
+        }
+    case 9U:
+        {
+
+            return min(6.2831854820251465 * length(v_2), length(radii_1) / 1.5);
+        }
+    case 13U:
+        {
+
+            return length(radii_1) * 0.56000000238418579;
+        }
+    default:
+        {
+
+            return p_2.sampleW_0;
+        }
+    }
+
+}
+
+
+float stripeBorder42_0(float cut_0, float lengthPx_2, float count_1)
+{
+
+    if((max(lengthPx_2, count_1)) <= 32768.0)
+    {
+
+        uint n_1 = uint(count_1);
+
+        uint numerator_0 = 2U * uint(cut_0) * uint(lengthPx_2);
+
+        float _S46;
+        if(numerator_0 <= n_1)
+        {
+
+            _S46 = 0.0;
+
+        }
+        else
+        {
+
+            uint _S47 = (numerator_0 + n_1 - 1U) / (2U * n_1);
+
+            _S46 = float(_S47);
+
+        }
+
+        return _S46;
+    }
+    return clamp(ceil(cut_0 * lengthPx_2 / count_1 - 0.5), 0.0, lengthPx_2);
+}
+
+
+float filteredLight42_0(float _S48, float _S49, float _S50, float _S51, bool _S52)
+{
+
+    bool _S53;
+
+    if(_S49 <= 1.0)
+    {
+
+        _S53 = true;
+
+    }
+    else
+    {
+
+        _S53 = _S50 <= 0.0;
+
+    }
+
+    if(_S53)
+    {
+
+        return 1.0;
+    }
+
+    float _S54 = min(0.77999997138977051, max(param_0.shadowWidth_0, 1.5 / _S49));
+    float halfPixel_0 = 0.5 * _S51 / _S49;
+    if(_S48 > (_S54 + halfPixel_0))
+    {
+
+        if(!_S52)
+        {
+
+            _S53 = true;
+
+        }
+        else
+        {
+
+            _S53 = _S48 < (1.0 - halfPixel_0);
+
+        }
+
+    }
+    else
+    {
+
+        _S53 = false;
+
+    }
+
+    if(_S53)
+    {
+
+        return 1.0;
+    }
+
+    float feather_2 = _S54 * max(0.02500000037252903, param_0.shadowSoftness_0);
+
+    float solid_2 = _S54 - feather_2;
+    float lo_0 = _S48 - halfPixel_0;
+
+    float hi_0 = _S48 + halfPixel_0;
+
+    float area_0;
+    if(_S52)
+    {
+
+        area_0 = repeatedShadowArea42_0(hi_0, solid_2, feather_2) - repeatedShadowArea42_0(lo_0, solid_2, feather_2);
+
+    }
+    else
+    {
+
+        area_0 = shadowArea42_0(hi_0, solid_2, feather_2) - shadowArea42_0(lo_0, solid_2, feather_2);
+
+    }
+
+
+    return 1.0 - param_0.shadowStrength_0 * _S50 * (clamp(area_0 / (2.0 * halfPixel_0), 0.0, 1.0) * smoothstep(1.0, 2.5, _S49));
+}
+
+
+float tiledLight42_0(float _S55, float _S56, float _S57)
+{
+
+    float _S58;
+
+    if((param_0.shadowSide_0) > 0.0)
+    {
+
+        _S58 = _S55;
+
+    }
+    else
+    {
+
+        _S58 = 1.0 - _S55;
+
+    }
+
+    return filteredLight42_0(_S58, _S56, _S57, 1.2999999523162842, true);
+}
+
+
+float edgeLight42_0(float _S59, float _S60, float _S61)
+{
+
+    float _S62;
+
+    if((param_0.shadowSide_0) > 0.0)
+    {
+
+        _S62 = _S59;
+
+    }
+    else
+    {
+
+        _S62 = 1.0 - _S59;
+
+    }
+
+    return filteredLight42_0(_S62, _S60, _S61, 1.0, false);
+}
+
+
+Field_0 creative42_0(vec2 _S63)
+{
+
+    float _S64 = param_0.cy_0;
+
+    vec2 center_0 = vec2(param_0.cx_0, param_0.cy_0);
+
+    float _S65 = param_0.sampleW_0;
+
+    float _S66 = param_0.sampleH_0;
+
+    float _S67 = param_0.aspect_0;
+    vec2 metric_0 = vec2(param_0.aspect_0, 1.0);
+
+    vec2 _S68 = _S63 - center_0;
+
+    vec2 v_3 = _S68 * metric_0;
+
+    float u_1 = param_0.u_0;
+
+    float _S69 = param_0.cycles_0;
+    float clock_0 = 2.0 * param_0.cycles_0 * param_0.u_0;
+
+    float _S70 = max(2.0, param_0.slices_0);
+    Field_0 f_1 = single3_0(_S63, bounce3_0(clock_0 + 1.0));
+    switch(param_0.design_0)
+    {
+    case 407U:
+        {
+
+            float y_1 = _S63.y - _S64;
+
+
+            float band_0 = (creativeAxis42_0(_S63.x + (0.10499999672174454 * sin(6.2831854820251465 * (y_1 + 0.34999999403953552 * u_1)) + 0.026000000536441803 * sin(6.2831854820251465 * (2.0 * y_1 - 0.69999998807907104 * u_1))), param_0.direction_0) - 0.51999998092651367 * _S69 * u_1) * _S70;
+
+            float cell_1 = floor(band_0);
+            float t_2 = bounce3_0(clock_0 - 0.75 * cell_1 / _S70);
+            float _S71 = mix(t_2, 1.0 - t_2, fract(cell_1 * 0.5) * 2.0 * param_0.span_0);
+
+            f_1.b_0 = _S71;
+
+            f_1.a_0 = _S71;
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_1.light_0 = tiledLight42_0(fract(band_0), _S65 / _S70, 1.0);
+
+            }
+
+            break;
+        }
+    case 408U:
+        {
+            float pitch_0 = sqrt(2.0 * _S67 / (1.7320507764816284 * _S70));
+            const vec2 basis_0 = vec2(1.0, 1.7320507764816284);
+            vec2 pos_0 = rot3_0(v_3, 0.15999999642372131 * sin(6.2831854820251465 * u_1)) / pitch_0;
+            vec2 a_4 = floor(pos_0 / basis_0 + 0.5) * basis_0;
+            vec2 b_1 = floor(pos_0 / basis_0) * basis_0 + basis_0 * 0.5;
+            vec2 da_0 = pos_0 - a_4;
+
+            vec2 db_0 = pos_0 - b_1;
+            bool first_0 = (dot(da_0, da_0)) <= (dot(db_0, db_0));
+
+            vec2 cell_2;
+            if(first_0)
+            {
+
+                cell_2 = a_4;
+
+            }
+            else
+            {
+
+                cell_2 = b_1;
+
+            }
+
+            vec2 local_0;
+
+            if(first_0)
+            {
+
+                local_0 = da_0;
+
+            }
+            else
+            {
+
+                local_0 = db_0;
+
+            }
+            float _S72 = cell_2.x;
+
+            float _S73 = cell_2.y;
+
+            float row_0 = round(2.0 * _S73 / 1.7320507764816284);
+
+
+            float _S74 = 0.039999999105930328 + 0.93000000715255737 * smoothstep(0.15999999642372131, 0.8399999737739563, bounce3_0(clock_0 - (1.3999999761581421 * creativeAxis42_0(0.5 + _S72 * pitch_0 / _S67, param_0.direction_0) + 0.34000000357627869 * _S73 * pitch_0 + 1.1000000238418579 * fract((round(_S72 - 0.5 * row_0) - row_0) / 3.0)) * param_0.span_0));
+
+            f_1.b_0 = _S74;
+
+            f_1.a_0 = _S74;
+
+            float _S75 = min(0.5, max(0.0010000000474974513, 1.0 - 1.7320507764816284 * abs(local_0.y)));
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_1.light_0 = edgeLight42_0(0.5 + 0.5 * local_0.x / _S75, 2.0 * _S75 * pitch_0 * _S66, 1.0);
+
+            }
+
+            break;
+        }
+    case 409U:
+        {
+
+            float swing_0 = 0.52999997138977051 * sin(6.2831854820251465 * u_1);
+
+            float focal_0 = 0.2199999988079071 * min(_S67, 1.0);
+            vec2 focus_0 = vec2(cos(swing_0), sin(swing_0)) * focal_0;
+
+            float range_0 = 2.0 * (max(length(max(center_0, 1.0 - center_0) * metric_0), 0.0010000000474974513) - focal_0) + 0.039999999105930328;
+
+            float band_1 = creativeAxis42_0(clamp((length(v_3 - focus_0) + length(v_3 + focus_0) - 2.0 * focal_0) / max(0.019999999552965164, range_0), 0.0, 1.0), param_0.direction_0) * _S70 - 0.77999997138977051 * _S69 * u_1;
+            float cell_3 = floor(band_1);
+            float t_3 = bounce3_0(clock_0 - param_0.span_0 * cell_3 / _S70);
+            float _S76 = mix(t_3, 1.0 - t_3, 0.80000001192092896 * fract(cell_3 * 0.5) * 2.0);
+
+            f_1.b_0 = _S76;
+
+            f_1.a_0 = _S76;
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_1.light_0 = tiledLight42_0(fract(band_1), range_0 * 0.5 * _S66 / _S70, 1.0);
+
+            }
+
+            break;
+        }
+    case 410U:
+        {
+
+            float _S77 = min(3.0, _S70);
+            vec2 shift_0 = _S68 + 0.5;
+            float _S78 = shift_0.y * _S77;
+
+            float row_1 = floor(_S78);
+            float base_0 = floor(_S70 / _S77);
+
+            int _S79;
+            if((clamp(row_1, 0.0, _S77 - 1.0)) < (_S70 - base_0 * _S77))
+            {
+
+                _S79 = 1;
+
+            }
+            else
+            {
+
+                _S79 = 0;
+
+            }
+
+            float cols_1 = base_0 + float(_S79);
+
+            float x_3 = shift_0.x * cols_1 - (0.62999999523162842 + 0.12999999523162842 * row_1) * _S69 * creativeAxis42_0(u_1, param_0.direction_0) + 0.36000001430511475 * row_1;
+            float col_0 = floor(x_3);
+            float _S80 = fract(x_3) - 0.5;
+
+            float _S81 = fract(_S78) - 0.5;
+            vec2 roundBox_0 = abs(vec2(_S80, _S81)) - vec2(0.37000000476837158, 0.33000001311302185);
+            float edge_1 = length(max(roundBox_0, vec2(0.0))) + min(max(roundBox_0.x, roundBox_0.y), 0.0) - 0.075000002980232239;
+            float aa_0 = max(cols_1 / _S65, _S77 / _S66) * 1.1000000238418579;
+            f_1.a_0 = 0.20000000298023224 + 0.63999998569488525 * bounce3_0(clock_0 + 0.69999998807907104);
+            f_1.b_0 = bounce3_0(clock_0 - 0.40999999642372131 * col_0 - 0.28999999165534973 * row_1) * param_0.span_0 + 0.039999999105930328;
+            f_1.weight_0 = 1.0 - smoothstep(- aa_0, aa_0, edge_1);
+            float _S82 = max(0.0, abs(_S81) - 0.33000001311302185);
+            float bound_0 = 0.37000000476837158 + sqrt(max(0.0, 0.0056250002235174179 - _S82 * _S82));
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_1.light_0 = edgeLight42_0(clamp(0.5 + 0.5 * _S80 / bound_0, 0.0, 1.0), 2.0 * bound_0 * _S65 / cols_1, f_1.weight_0);
+
+            }
+
+            break;
+        }
+    default:
+        {
+
+            break;
+        }
+    }
+    return f_1;
+}
+
+
+bool isStripe42_1()
+{
+
+    bool _S83;
+
+    if((param_0.customMap_0) == 0U)
+    {
+
+        _S83 = (param_0.direction_0) < 2U;
+
+    }
+    else
+    {
+
+        _S83 = false;
+
+    }
+
+    if(_S83)
+    {
+
+        uint _S84 = param_0.shape_0;
+
+        if((param_0.shape_0) == 0U)
+        {
+
+            _S83 = true;
+
+        }
+        else
+        {
+
+            _S83 = _S84 == 1U;
+
+        }
+
+        if(_S83)
+        {
+
+            _S83 = true;
+
+        }
+        else
+        {
+
+            _S83 = _S84 == 11U;
+
+        }
+
+    }
+    else
+    {
+
+        _S83 = false;
+
+    }
+
+    return _S83;
+}
+
+
+Coord_0 coordinate3_1(vec2 _S85, float _S86)
+{
+
+    Coord_0 c_1;
+
+    vec2 _S87 = vec2(ivec2(0));
+
+    c_1.cell_0 = _S87;
+
+    c_1.frac_0 = _S87;
+
+    c_1.index_1 = 0.0;
+
+    c_1.coverage_0 = 1.0;
+
+    float _S88 = _S85.x;
+
+    float _S89 = max(2.0, param_0.slices_0);
+
+    float _S90 = param_0.outputW_0;
+
+    float _S91 = param_0.outputH_0;
+    vec2 dim_1 = vec2(param_0.outputW_0, param_0.outputH_0);
+
+    vec2 _S92 = vec2(param_0.cx_0, param_0.cy_0);
+
+    vec2 v_4 = (_S85 - _S92) * dim_1;
+    vec2 radii_2 = max(_S92, 1.0 - _S92) * dim_1;
+    float _S93 = max(length(radii_2), 1.0);
+
+    float rmin_1 = length(max(_S87, max(- _S92, _S92 - 1.0)) * dim_1);
+
+    uint _S94 = param_0.shape_0;
+
+    float q_5;
+
+    float lengthPx_3;
+
+    int _S95;
+
+    bool _S96;
+    switch(param_0.shape_0)
+    {
+    case 0U:
+        {
+
+            q_5 = _S88;
+            break;
+        }
+    case 1U:
+        {
+
+            q_5 = _S85.y;
+            break;
+        }
+    case 2U:
+    case 12U:
+        {
+
+            float a_5 = param_0.angle_0 * 3.1415927410125732 / 180.0;
+
+            float _S97 = cos(a_5);
+
+            float _S98 = sin(a_5);
+
+            float _S99 = _S90 * _S97;
+
+            float _S100 = _S91 * _S98;
+
+            float q_6 = (dot(_S85 * dim_1, vec2(_S97, _S98)) - (min(0.0, _S99) + min(0.0, _S100))) / max(1.0, abs(_S99) + abs(_S100));
+
+            if(_S94 == 12U)
+            {
+
+                q_5 = q_6 + 0.070000000298023224 * (2.0 * abs(2.0 * fract(_S85.y * 6.0) - 1.0) - 1.0);
+
+            }
+            else
+            {
+
+                q_5 = q_6;
+
+            }
+
+            break;
+        }
+    case 3U:
+        {
+
+            switch(param_0.origin_0)
+            {
+            case 1U:
+                {
+
+                    q_5 = axisAngle3_0(v_4.y, v_4.x);
+
+                    break;
+                }
+            case 2U:
+                {
+
+                    q_5 = axisAngle3_0(v_4.x, - v_4.y);
+
+                    break;
+                }
+            case 3U:
+                {
+
+                    q_5 = axisAngle3_0(- v_4.x, v_4.y);
+
+                    break;
+                }
+            default:
+                {
+
+                    q_5 = axisAngle3_0(- v_4.y, - v_4.x);
+
+                    break;
+                }
+            }
+
+            if(q_5 >= 0.0)
+            {
+
+                _S96 = q_5 <= 3.1415927410125732;
+
+            }
+            else
+            {
+
+                _S96 = false;
+
+            }
+
+            if(_S96)
+            {
+
+                _S95 = 1;
+
+            }
+            else
+            {
+
+                _S95 = 0;
+
+            }
+
+            c_1.coverage_0 = float(_S95);
+
+            q_5 = clamp(q_5 / 3.1415927410125732, 0.0, 1.0);
+
+            break;
+        }
+    case 4U:
+        {
+            float startAngle_1 = param_0.angle_0 / 360.0;
+
+
+
+            float _S101 = v_4.x;
+
+            float _S102 = v_4.y;
+
+            float _S103 = axisAngle3_0(_S101, - _S102);
+
+
+            float _S104 = abs(_S101);
+
+            float _S105 = abs(_S102);
+
+            if((_S104 + _S105) < 9.99999997475242708e-07)
+            {
+
+                q_5 = 0.0;
+
+            }
+            else
+            {
+
+                if(_S105 < 9.99999997475242708e-07)
+                {
+
+                    if(_S101 > 0.0)
+                    {
+
+                        q_5 = 1.5707963705062866;
+
+                    }
+                    else
+                    {
+
+                        q_5 = -1.5707963705062866;
+
+                    }
+
+                }
+                else
+                {
+
+                    if(_S104 < 9.99999997475242708e-07)
+                    {
+
+                        if(_S102 < 0.0)
+                        {
+
+                            q_5 = 0.0;
+
+                        }
+                        else
+                        {
+
+                            q_5 = 3.1415927410125732;
+
+                        }
+
+                    }
+                    else
+                    {
+
+                        q_5 = _S103;
+
+                    }
+
+                }
+
+            }
+
+            q_5 = fract(q_5 / 6.2831854820251465 + 1.0 - param_0.turns_0 * param_0.u_0 - startAngle_1);
+
+
+
+            break;
+        }
+    case 5U:
+    case 14U:
+        {
+
+            q_5 = (length(v_4) - rmin_1) / max(1.0, _S93 - rmin_1);
+
+            break;
+        }
+    case 6U:
+    case 7U:
+        {
+
+            vec2 vr_1 = rot3_0(v_4, param_0.angle_0 * 3.1415927410125732 / 180.0 + param_0.turns_0 * 2.0 * 3.1415927410125732 * param_0.u_0);
+            if(_S94 == 6U)
+            {
+
+                q_5 = (abs(vr_1.x) + abs(vr_1.y)) / max(1.0, radii_2.x + radii_2.y);
+
+            }
+            else
+            {
+
+                q_5 = max(abs(vr_1.x) / max(radii_2.x, 1.0), abs(vr_1.y) / max(radii_2.y, 1.0));
+
+            }
+
+            break;
+        }
+    case 8U:
+    case 10U:
+        {
+
+            bool _S106 = _S94 == 10U;
+
+            if(_S106)
+            {
+
+                q_5 = max(1.0, ceil(_S89 / 2.0));
+
+            }
+            else
+            {
+
+                q_5 = _S89;
+
+            }
+            vec2 gs_1 = gridSize3_0(q_5, dim_1);
+
+            float _S107 = gs_1.y;
+
+            float _S108 = _S85.y * _S107;
+
+            float _S109 = min(floor(_S108), _S107 - 1.0);
+
+            float _S110 = gs_1.x;
+
+            float extra_1 = q_5 - _S110 * _S107;
+            if(_S109 < extra_1)
+            {
+
+                _S95 = 1;
+
+            }
+            else
+            {
+
+                _S95 = 0;
+
+            }
+
+            float cols_2 = _S110 + float(_S95);
+
+            float _S111 = _S88 * cols_2;
+
+            float _S112 = min(floor(_S111), cols_2 - 1.0);
+            float index_3 = _S109 * _S110 + min(_S109, extra_1) + _S112;
+
+            c_1.cell_0 = vec2(_S112, _S109);
+
+            c_1.frac_0 = fract(vec2(_S111, _S108));
+            if(_S106)
+            {
+
+                float _S113 = _S89 - 1.0;
+
+                float _S114 = index_3 * 2.0;
+
+                if((c_1.frac_0.x + c_1.frac_0.y) >= 1.0)
+                {
+
+                    _S95 = 1;
+
+                }
+                else
+                {
+
+                    _S95 = 0;
+
+                }
+
+                lengthPx_3 = min(_S113, _S114 + float(_S95));
+
+            }
+            else
+            {
+
+                lengthPx_3 = index_3;
+
+            }
+
+            q_5 = lengthPx_3 / max(1.0, _S89 - 1.0);
+            break;
+        }
+    case 9U:
+        {
+
+            q_5 = fract(axisAngle3_0(v_4.y, v_4.x) / 6.2831854820251465 + 0.5 + 1.5 * (length(v_4) / _S93));
+
+            break;
+        }
+    case 11U:
+        {
+
+            q_5 = _S88;
+            break;
+        }
+    case 13U:
+        {
+
+            q_5 = length(v_4) / max(1.0, _S93 * (0.77999997138977051 + 0.2199999988079071 * cos(5.0 * axisAngle3_0(v_4.y, v_4.x))));
+            break;
+        }
+    default:
+        {
+
+            q_5 = _S88;
+
+            break;
+        }
+    }
+
+    if((param_0.customMap_0) != 0U)
+    {
+
+        c_1.coverage_0 = 1.0;
+
+        q_5 = _S86;
+
+    }
+    float q_7 = clamp(q_5, 0.0, 1.0);
+
+    uint _S115 = param_0.direction_0;
+    bool _S116 = (param_0.direction_0) == 1U;
+
+    if(_S116)
+    {
+
+        q_5 = 1.0 - q_7;
+
+    }
+    else
+    {
+
+        q_5 = q_7;
+
+    }
+    if(_S115 >= 2U)
+    {
+
+        if(_S94 == 8U)
+        {
+
+            _S96 = true;
+
+        }
+        else
+        {
+
+            _S96 = _S94 == 10U;
+
+        }
+
+        if(_S96)
+        {
+
+            q_5 = max(abs(_S88 - 0.5), abs(_S85.y - 0.5)) * 2.0;
+
+        }
+        else
+        {
+
+            q_5 = abs(q_5 - 0.5) * 2.0;
+
+        }
+
+        if(_S115 == 3U)
+        {
+
+            q_5 = 1.0 - q_5;
+
+        }
+
+    }
+
+    c_1.raw_0 = q_5;
+
+    float _S117 = q_5 * _S89;
+
+    float _S118 = _S89 - 1.0;
+
+    c_1.index_1 = min(floor(_S117), _S118);
+
+
+
+    float edge_2 = round(_S117);
+    if((abs(_S117 - edge_2)) < 9.9999997473787516e-05)
+    {
+
+        c_1.raw_0 = edge_2 / _S89;
+
+        c_1.index_1 = min(edge_2, _S118);
+
+    }
+
+
+
+    if(isStripe42_1())
+    {
+
+        _S96 = (param_0.reserved0_0) <= 0.0;
+
+    }
+    else
+    {
+
+        _S96 = false;
+
+    }
+
+    if(_S96)
+    {
+
+
+        bool _S119 = _S94 == 1U;
+
+        if(_S119)
+        {
+
+            lengthPx_3 = param_0.sampleH_0;
+
+        }
+        else
+        {
+
+            lengthPx_3 = param_0.sampleW_0;
+
+        }
+
+        float _S120;
+        if(_S119)
+        {
+
+            _S120 = _S85.y;
+
+        }
+        else
+        {
+
+            _S120 = _S88;
+
+        }
+
+        float pixel_3 = floor(_S120 * lengthPx_3);
+        if(_S116)
+        {
+
+            _S120 = lengthPx_3 - 1.0 - pixel_3;
+
+        }
+        else
+        {
+
+            _S120 = pixel_3;
+
+        }
+
+        float _S121 = rasterStripeIndex42_0(_S120, lengthPx_3, _S89);
+
+        c_1.index_1 = _S121;
+
+    }
+
+    if((param_0.pixel_0) > 0.0)
+    {
+    }
+    else
+    {
+
+        q_5 = c_1.index_1 / _S118;
+
+    }
+
+    c_1.q_1 = q_5;
+    return c_1;
+}
+
+
+Field_0 creative3_0(vec2 _S122, Coord_0 _S123)
+{
+
+    float u_2 = param_0.u_0;
+
+    float _S124 = param_0.cycles_0;
+
+    float clock_1 = 2.0 * param_0.cycles_0 * param_0.u_0;
+
+    float _S125 = max(2.0, param_0.slices_0);
+
+    float depth_0 = param_0.span_0;
+
+    float _S126 = param_0.cx_0;
+    vec2 center_1 = vec2(param_0.cx_0, param_0.cy_0);
+
+    float _S127 = param_0.aspect_0;
+
+    vec2 metric_1 = vec2(param_0.aspect_0, 1.0);
+
+    vec2 v_5 = (_S122 - center_1) * metric_1;
+    float _S128 = bounce3_0(clock_1);
+
+    Field_0 f_2 = single3_0(_S122, _S128);
+
+    float band_2;
+
+    float phase_0;
+
+    float lateral_0;
+
+    float q_8;
+
+    int i_0;
+
+    bool horizontal_0;
+    switch(param_0.design_0)
+    {
+    case 9U:
+        {
+
+            float _S129 = length(v_5);
+            float phase_1 = fract(2.0 * (axisAngle3_0(v_5.x, - v_5.y) / 6.2831854820251465) + _S129 / max(length(metric_1 * 0.5), 0.0010000000474974513) * 1.5 * depth_0);
+
+            float _S130 = param_0.pixel_0;
+
+            bool _S131 = (param_0.pixel_0) > 0.0;
+
+            if(_S131)
+            {
+
+                band_2 = phase_1 - _S124 * u_2;
+
+            }
+            else
+            {
+
+                band_2 = phase_1 * _S125;
+
+            }
+            if(_S130 == 0.0)
+            {
+
+                phase_0 = floor(band_2) / (_S125 - 1.0);
+
+            }
+            else
+            {
+
+                phase_0 = phase_1;
+
+            }
+            float _S132 = 0.20000000298023224 + 0.80000001192092896 * fract(_S124 * u_2 - phase_0);
+
+            f_2.b_0 = _S132;
+
+            f_2.a_0 = _S132;
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                float _S133 = fract(band_2);
+
+                float _S134 = min(3.1415927410125732 * _S129 * param_0.sampleH_0, param_0.sampleH_0);
+
+                if(_S131)
+                {
+
+                    band_2 = 1.0;
+
+                }
+                else
+                {
+
+                    band_2 = _S125;
+
+                }
+
+                f_2.light_0 = tiledLight42_0(_S133, _S134 / band_2, 1.0);
+
+            }
+
+            break;
+        }
+    case 10U:
+        {
+
+            float q_9 = clamp(1.0 - abs(_S122.x - _S126) * 2.0, 0.0, 1.0);
+
+            float _S135 = _S125 - 1.0;
+
+            float band_3 = q_9 * _S135;
+
+            float _S136 = param_0.pixel_0;
+            if((param_0.pixel_0) == 0.0)
+            {
+
+                q_8 = floor(band_3) / _S135;
+
+            }
+            else
+            {
+
+                q_8 = q_9;
+
+            }
+            float _S137 = 0.80000001192092896 * depth_0;
+
+            float _S138 = _S137 * q_8;
+
+            float _S139 = bounce3_0(clock_1 - _S138);
+
+            f_2.b_0 = _S139;
+
+            f_2.a_0 = _S139;
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                bool _S140 = _S136 > 0.0;
+
+                if(_S140)
+                {
+
+                    band_2 = _S138 - clock_1;
+
+                }
+                else
+                {
+
+                    band_2 = band_3;
+
+                }
+
+                float _S141 = fract(band_2);
+
+                float _S142 = 0.5 * param_0.sampleW_0;
+
+                if(_S140)
+                {
+
+                    band_2 = _S137;
+
+                }
+                else
+                {
+
+                    band_2 = _S135;
+
+                }
+
+                f_2.light_0 = tiledLight42_0(_S141, _S142 / band_2, 1.0);
+
+            }
+
+            break;
+        }
+    case 11U:
+        {
+            float _S143 = 0.23999999463558197 + max(0.0040000001899898052, param_0.softness_0 * 0.15999999642372131);
+
+            float _S144 = _S123.frac_0.y;
+
+            float ah_0 = 1.0 - smoothstep(0.23999999463558197, _S143, abs(_S144 - 0.5));
+
+            float _S145 = _S123.frac_0.x;
+
+            float av_0 = 1.0 - smoothstep(0.23999999463558197, _S143, abs(_S145 - 0.5));
+            float _S146 = _S123.cell_0.y;
+
+            bool over_0 = (int(floor(_S123.cell_0.x) + floor(_S146)) % 2) == 0;
+            float ht_0 = bounce3_0(clock_1 - _S122.x * depth_0);
+
+            float vt_0 = bounce3_0(clock_1 + _S122.y * depth_0 + 1.0);
+            bool _S147 = ah_0 > 0.0;
+
+            if(_S147)
+            {
+
+                horizontal_0 = true;
+
+            }
+            else
+            {
+
+                horizontal_0 = av_0 > 0.0;
+
+            }
+
+            if(horizontal_0)
+            {
+
+                if(over_0)
+                {
+
+                    band_2 = vt_0;
+
+                }
+                else
+                {
+
+                    band_2 = ht_0;
+
+                }
+
+                f_2.a_0 = band_2;
+
+                if(over_0)
+                {
+
+                    band_2 = ht_0;
+
+                }
+                else
+                {
+
+                    band_2 = vt_0;
+
+                }
+
+                f_2.b_0 = band_2;
+
+                if(over_0)
+                {
+
+                    band_2 = ah_0;
+
+                }
+                else
+                {
+
+                    band_2 = av_0;
+
+                }
+
+                f_2.weight_0 = band_2;
+
+                if(ah_0 == 0.0)
+                {
+
+                    f_2.b_0 = vt_0;
+
+                    f_2.a_0 = vt_0;
+
+                }
+
+                if(av_0 == 0.0)
+                {
+
+                    f_2.b_0 = ht_0;
+
+                    f_2.a_0 = ht_0;
+
+                }
+
+            }
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                if(_S147)
+                {
+
+                    horizontal_0 = true;
+
+                }
+                else
+                {
+
+                    horizontal_0 = av_0 > 0.0;
+
+                }
+
+            }
+            else
+            {
+
+                horizontal_0 = false;
+
+            }
+
+            if(horizontal_0)
+            {
+
+                if(av_0 == 0.0)
+                {
+
+                    horizontal_0 = true;
+
+                }
+                else
+                {
+
+                    if(_S147)
+                    {
+
+                        horizontal_0 = over_0;
+
+                    }
+                    else
+                    {
+
+                        horizontal_0 = false;
+
+                    }
+
+                }
+                if(horizontal_0)
+                {
+
+                    band_2 = ah_0;
+
+                }
+                else
+                {
+
+                    band_2 = av_0;
+
+                }
+                if(horizontal_0)
+                {
+
+                    phase_0 = _S144;
+
+                }
+                else
+                {
+
+                    phase_0 = _S145;
+
+                }
+
+                float phase_2 = clamp((phase_0 - 0.25999999046325684) / 0.47999998927116394, 0.0, 1.0);
+                vec2 grid_0 = gridSize3_0(_S125, vec2(param_0.outputW_0, param_0.outputH_0));
+                float _S148 = grid_0.x;
+
+                float _S149 = grid_0.y;
+
+                if(_S146 < (_S125 - _S148 * _S149))
+                {
+
+                    i_0 = 1;
+
+                }
+                else
+                {
+
+                    i_0 = 0;
+
+                }
+
+                float cols_3 = _S148 + float(i_0);
+                if(horizontal_0)
+                {
+
+                    phase_0 = param_0.sampleH_0 / _S149;
+
+                }
+                else
+                {
+
+                    phase_0 = param_0.sampleW_0 / cols_3;
+
+                }
+
+                f_2.light_0 = edgeLight42_0(phase_2, 0.47999998927116394 * phase_0, band_2);
+
+            }
+
+            break;
+        }
+    case 12U:
+        {
+
+            uint sources_0 = clamp(param_0.waveSources_0, 2U, 4U);
+
+            uint i_1 = 0U;
+
+            band_2 = 0.0;
+            for(;;)
+            {
+
+                if(i_1 < sources_0)
+                {
+                }
+                else
+                {
+
+                    break;
+                }
+
+                float a_6 = 6.2831854820251465 * float(i_1) / float(sources_0);
+                float r_0 = length((_S122 - (center_1 + vec2(0.18000000715255737 * cos(a_6), 0.18000000715255737 * sin(a_6)))) * metric_1);
+
+                float band_4 = r_0 * _S125;
+
+                float _S150 = param_0.pixel_0;
+                if((param_0.pixel_0) == 0.0)
+                {
+
+                    phase_0 = floor(band_4) / _S125;
+
+                }
+                else
+                {
+
+                    phase_0 = r_0;
+
+                }
+                float _S151 = phase_0 * 1.2999999523162842 * depth_0;
+
+                float sum_0 = band_2 + bounce3_0(clock_1 - _S151);
+
+                if((param_0.shadowStrength_0) > 0.0)
+                {
+
+                    bool _S152 = _S150 > 0.0;
+
+                    if(_S152)
+                    {
+
+                        lateral_0 = _S151 - clock_1;
+
+                    }
+                    else
+                    {
+
+                        lateral_0 = band_4;
+
+                    }
+
+                    float phase_3 = fract(lateral_0);
+                    float _S153 = f_2.light_0;
+
+                    float _S154 = param_0.sampleH_0;
+
+                    if(_S152)
+                    {
+
+                        q_8 = 1.2999999523162842 * depth_0;
+
+                    }
+                    else
+                    {
+
+                        q_8 = _S125;
+
+                    }
+
+                    f_2.light_0 = min(_S153, tiledLight42_0(phase_3, _S154 / q_8, 1.0));
+
+                }
+
+                i_1 = i_1 + 1U;
+
+                band_2 = sum_0;
+
+            }
+
+            float _S155 = band_2 / float(sources_0);
+
+            f_2.b_0 = _S155;
+
+            f_2.a_0 = _S155;
+
+            break;
+        }
+    case 13U:
+        {
+
+            float _S156 = 6.2831854820251465 * u_2;
+
+            float _S157 = sin(_S156);
+            vec2 local_1 = (_S122 - (center_1 + vec2(0.2199999988079071 * _S157, 0.12999999523162842 * cos(_S156)))) * metric_1;
+            float r_1 = length(local_1);
+
+            float radius_0 = 0.17000000178813934 + 0.039999999105930328 * _S157;
+
+            float _S158 = max(0.0020000000949949026, param_0.softness_0 * 0.15999999642372131);
+            f_2.b_0 = bounce3_0(clock_1 + 0.80000001192092896 * depth_0);
+
+            f_2.weight_0 = 1.0 - smoothstep(radius_0 - _S158, radius_0 + _S158, r_1);
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                horizontal_0 = (f_2.weight_0) > 0.0;
+
+            }
+            else
+            {
+
+                horizontal_0 = false;
+
+            }
+
+            if(horizontal_0)
+            {
+
+                float _S159 = local_1.y;
+
+                float halfWidth_0 = sqrt(max(9.99999997475242708e-07, radius_0 * radius_0 - _S159 * _S159));
+
+                f_2.light_0 = edgeLight42_0(clamp(0.5 + 0.5 * local_1.x / halfWidth_0, 0.0, 1.0), 2.0 * halfWidth_0 * param_0.sampleH_0, f_2.weight_0);
+
+            }
+
+            break;
+        }
+    case 400U:
+        {
+
+            float _S160 = max(_S125, 2.0);
+
+            float gap_0 = 0.64999997615814209 / _S160;
+            float d_0 = fract(u_2 * _S124) * 1.6499999761581421 - _S122.x;
+
+            float j_0 = floor(d_0 / gap_0);
+
+            float local_2 = fract(d_0 / gap_0);
+            if(j_0 >= 0.0)
+            {
+
+                horizontal_0 = j_0 < _S160;
+
+            }
+            else
+            {
+
+                horizontal_0 = false;
+
+            }
+
+            if(horizontal_0)
+            {
+
+                float _S161 = max(0.014999999664723873, param_0.softness_0 * 0.15000000596046448);
+
+                float a_7 = smoothstep(0.0, _S161, local_2) * (1.0 - smoothstep(0.64999997615814209, 0.64999997615814209 + _S161, local_2));
+
+                f_2.b_0 = clamp(1.0 - j_0 / _S160, 0.0, 1.0);
+
+                f_2.weight_0 = a_7 * (1.0 - 0.64999997615814209 * j_0 / _S160);
+
+            }
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_2.light_0 = edgeLight42_0(clamp(1.0 - local_2 / 0.64999997615814209, 0.0, 1.0), gap_0 * 0.64999997615814209 * param_0.sampleW_0, f_2.weight_0);
+
+            }
+
+            break;
+        }
+    case 401U:
+        {
+
+            float _S162 = _S122.y;
+
+            if((int(floor(_S162 * _S125)) % 2) == 0)
+            {
+
+                band_2 = 1.0;
+
+            }
+            else
+            {
+
+                band_2 = -1.0;
+
+            }
+            float gap_1 = 0.34999999403953552 * smoothstep(_S128 - 0.059999998658895493, _S128 + 0.059999998658895493, _S162);
+
+            float seam_0 = _S126 + band_2 * 0.02500000037252903;
+            float _S163 = _S122.x;
+
+            float _S164 = _S163 - seam_0;
+
+            bool outside_0 = (abs(_S164)) > gap_1;
+            if(outside_0)
+            {
+
+                if(_S163 < seam_0)
+                {
+
+                    band_2 = 0.079999998211860657;
+
+                }
+                else
+                {
+
+                    band_2 = 0.94999998807907104;
+
+                }
+
+                f_2.b_0 = band_2;
+
+                f_2.a_0 = band_2;
+
+            }
+
+            bool _S165 = (param_0.shadowStrength_0) > 0.0;
+
+            if(_S165)
+            {
+
+                float _S166 = clamp((_S164 + gap_1) / 0.2199999988079071 + 1.0, 0.0, 1.0);
+
+                float _S167 = 0.2199999988079071 * param_0.sampleW_0;
+
+                if(outside_0)
+                {
+
+                    horizontal_0 = _S163 < seam_0;
+
+                }
+                else
+                {
+
+                    horizontal_0 = false;
+
+                }
+
+                if(horizontal_0)
+                {
+
+                    band_2 = 1.0;
+
+                }
+                else
+                {
+
+                    band_2 = 0.0;
+
+                }
+
+                f_2.light_0 = edgeLight42_0(_S166, _S167, band_2);
+
+            }
+
+            if(_S165)
+            {
+
+                horizontal_0 = (param_0.shadowSide_0) > 0.0;
+
+            }
+            else
+            {
+
+                horizontal_0 = false;
+
+            }
+
+            if(horizontal_0)
+            {
+
+                float _S168 = clamp((_S164 - gap_1) / 0.2199999988079071, 0.0, 1.0);
+
+                float _S169 = 0.2199999988079071 * param_0.sampleW_0;
+
+                if(outside_0)
+                {
+
+                    horizontal_0 = _S163 > seam_0;
+
+                }
+                else
+                {
+
+                    horizontal_0 = false;
+
+                }
+
+                if(horizontal_0)
+                {
+
+                    band_2 = 1.0;
+
+                }
+                else
+                {
+
+                    band_2 = 0.0;
+
+                }
+
+                f_2.light_0 = edgeLight42_0(_S168, _S169, band_2);
+
+            }
+
+
+            break;
+        }
+    case 402U:
+        {
+
+            float a_8 = axisAngle3_0(v_5.y, v_5.x);
+
+            float r_2 = length(v_5);
+            float radius_1 = 0.4699999988079071 * min(_S127, 1.0) * (0.5 - 0.5 * cos(6.2831854820251465 * u_2 * _S124)) * (0.72000002861022949 + 0.2800000011920929 * cos(a_8 * _S125));
+
+            float _S170 = max(0.0010000000474974513, param_0.softness_0 * 0.019999999552965164);
+            float _S171 = fract((a_8 + 3.1415927410125732) / 6.2831854820251465) * _S125;
+            f_2.b_0 = bounce3_0(clock_1 + floor(_S171) / _S125 * depth_0);
+
+            f_2.weight_0 = 1.0 - smoothstep(radius_1 - _S170, radius_1 + _S170, r_2);
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_2.light_0 = tiledLight42_0(fract(_S171), 6.2831854820251465 * r_2 * param_0.sampleH_0 / _S125, f_2.weight_0);
+
+            }
+
+            break;
+        }
+    case 403U:
+        {
+
+            float r_3 = length(v_5);
+
+            float _S172 = max(3.0, _S125);
+
+            float sector_0 = 6.2831854820251465 / _S172;
+            float _S173 = axisAngle3_0(v_5.y, v_5.x) + u_2 * 3.1415927410125732 + 3.1415927410125732;
+            float aperture_0 = (0.02500000037252903 + 0.44999998807907104 * (0.5 - 0.5 * cos(6.2831854820251465 * u_2 * _S124))) * min(_S127, 1.0) * cos(3.1415927410125732 / _S172) / max(0.0010000000474974513, cos(fract(_S173 / sector_0) * sector_0 - sector_0 * 0.5));
+
+            f_2.a_0 = bounce3_0(clock_1 - depth_0 * floor(fract(_S173 / 6.2831854820251465) * _S172) / _S172);
+
+            f_2.b_0 = bounce3_0(clock_1 + 1.0);
+
+            f_2.weight_0 = 1.0 - smoothstep(aperture_0 - 0.0020000000949949026, aperture_0 + 0.0020000000949949026, r_3);
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_2.light_0 = tiledLight42_0(fract(_S173 / sector_0), sector_0 * r_3 * param_0.sampleH_0, 1.0 - f_2.weight_0);
+
+            }
+
+            break;
+        }
+    case 404U:
+        {
+
+            float _S174 = fract(u_2 * _S124);
+
+            band_2 = 1.0e+09;
+
+            phase_0 = 0.0;
+
+            lateral_0 = 0.0;
+
+            i_0 = 0;
+
+
+
+            for(;;)
+            {
+
+                if(i_0 < 32)
+                {
+                }
+                else
+                {
+
+                    break;
+                }
+
+                float _S175 = float(i_0);
+
+                float a0_0 = 6.2831854820251465 * _S175 / 32.0;
+
+                int _S176 = i_0 + 1;
+
+                float a1_0 = 6.2831854820251465 * float(_S176) / 32.0;
+                vec2 a_9 = center_1 + vec2(0.34000000357627869 * sin(a0_0), 0.2199999988079071 * sin(2.0 * a0_0));
+                vec2 segment_0 = (center_1 + vec2(0.34000000357627869 * sin(a1_0), 0.2199999988079071 * sin(2.0 * a1_0)) - a_9) * metric_1;
+
+                vec2 point_0 = (_S122 - a_9) * metric_1;
+
+                float k_0 = clamp(dot(point_0, segment_0) / max(dot(segment_0, segment_0), 1.00000001168609742e-07), 0.0, 1.0);
+                vec2 delta_0 = point_0 - k_0 * segment_0;
+
+                float distance_2 = dot(delta_0, delta_0);
+
+                float trail_0 = fract(_S174 - (_S175 + k_0) / 32.0 + 1.0);
+                if(trail_0 < 0.60000002384185791)
+                {
+
+                    horizontal_0 = distance_2 < band_2;
+
+                }
+                else
+                {
+
+                    horizontal_0 = false;
+
+                }
+
+                if(horizontal_0)
+                {
+
+                    if((param_0.shadowStrength_0) > 0.0)
+                    {
+
+                        if((dot(delta_0, vec2(segment_0.y, - segment_0.x))) >= 0.0)
+                        {
+
+                            q_8 = 1.0;
+
+                        }
+                        else
+                        {
+
+                            q_8 = -1.0;
+
+                        }
+
+                    }
+                    else
+                    {
+
+                        q_8 = lateral_0;
+
+                    }
+
+                    band_2 = distance_2;
+
+                    phase_0 = trail_0;
+
+                    lateral_0 = q_8;
+
+                }
+
+                i_0 = _S176;
+
+            }
+
+            float _S177 = max(0.0020000000949949026, param_0.softness_0 * 0.039999999105930328);
+
+            float best_0 = sqrt(band_2);
+
+            f_2.weight_0 = 1.0 - smoothstep(0.035000000149011612 - _S177, 0.035000000149011612 + _S177, best_0);
+            float q_10 = phase_0 / 0.60000002384185791;
+
+            if((param_0.pixel_0) == 0.0)
+            {
+
+                q_8 = floor(q_10 * _S125) / (_S125 - 1.0);
+
+            }
+            else
+            {
+
+                q_8 = q_10;
+
+            }
+
+            f_2.b_0 = 0.15000000596046448 + 0.85000002384185791 * q_8;
+
+            if((param_0.shadowStrength_0) > 0.0)
+            {
+
+                f_2.light_0 = edgeLight42_0(clamp(0.5 + best_0 * lateral_0 / 0.070000000298023224, 0.0, 1.0), 0.070000000298023224 * param_0.sampleH_0, f_2.weight_0);
+
+            }
+
+            break;
+        }
+    default:
+        {
+
+            break;
+        }
+    }
+
+    return f_2;
+}
+
+
+Field_0 frozen3_0(vec2 _S178, Coord_0 _S179)
+{
+
+    float build_1 = clamp(param_0.build_0, 0.10000000149011612, 0.89999997615814209);
+
+    float u_3 = param_0.u_0;
+
+    bool _S180 = (param_0.pixel_0) > 0.0;
+
+    float held_0;
+
+    if(_S180)
+    {
+
+        held_0 = _S179.raw_0;
+
+    }
+    else
+    {
+
+        held_0 = min(1.0, (_S179.index_1 + 1.0) / max(2.0, param_0.slices_0));
+
+    }
+
+    uint _S181 = param_0.flags_0;
+
+
+
+    if(((param_0.flags_0) & 1024U) != 0U)
+    {
+
+        float skip_0 = clamp(param_0.reserved1_0, 0.0, 1.0);
+
+        float _S182 = held_0 * (1.0 - skip_0);
+
+        if(held_0 > 0.5)
+        {
+
+            held_0 = skip_0;
+
+        }
+        else
+        {
+
+            held_0 = 0.0;
+
+        }
+
+        held_0 = _S182 + held_0;
+
+    }
+
+    float a_10;
+
+    if(u_3 < build_1)
+    {
+
+        float progress_0 = u_3 / build_1;
+
+        bool _S183;
+        if(_S180)
+        {
+
+            _S183 = true;
+
+        }
+        else
+        {
+
+            _S183 = (_S181 & 1U) != 0U;
+
+        }
+
+        if(_S183)
+        {
+
+            float _S184 = max(1.0 / max(param_0.outputW_0, param_0.outputH_0), param_0.softness_0 * 0.0030000000260770321);
+
+            a_10 = 1.0 - smoothstep(progress_0 - _S184, progress_0 + _S184, _S179.raw_0);
+
+        }
+        else
+        {
+
+            int _S185;
+            if(progress_0 >= (_S179.q_1))
+            {
+
+                _S185 = 1;
+
+            }
+            else
+            {
+
+                _S185 = 0;
+
+            }
+
+            a_10 = float(_S185);
+
+        }
+
+        Field_0 f_3 = single3_0(_S178, progress_0);
+
+        f_3.b_0 = held_0;
+
+        f_3.weight_0 = a_10;
+
+        return f_3;
+    }
+    float after_0 = clamp((u_3 - build_1) / (1.0 - build_1), 0.0, 1.0);
+    switch(param_0.ending_0)
+    {
+    case 0U:
+        {
+
+            a_10 = held_0;
+            break;
+        }
+    case 1U:
+        {
+
+            a_10 = clamp(held_0 + after_0, 0.0, 1.0);
+            break;
+        }
+    case 2U:
+        {
+
+            float release_0 = _S179.q_1 * 0.64999997615814209;
+
+            a_10 = clamp(held_0 + max(0.0, after_0 - release_0) / max(0.05000000074505806, 1.0 - release_0), 0.0, 1.0);
+
+            break;
+        }
+    case 3U:
+        {
+
+            if(after_0 > 0.0)
+            {
+
+                held_0 = play3_0(held_0 - 2.0 * param_0.cycles_0 * after_0, param_0.playback_0);
+
+            }
+
+            a_10 = held_0;
+
+
+
+            break;
+        }
+    case 4U:
+        {
+
+            a_10 = bounce3_0(held_0 - 2.0 * param_0.cycles_0 * after_0);
+            break;
+        }
+    default:
+        {
+
+            a_10 = held_0;
+
+            break;
+        }
+    }
+
+    return single3_0(_S178, a_10);
+}
+
+
+float relative3_0(Coord_0 _S186)
+{
+
+    uint _S187 = param_0.flags_0;
+
+    float d_1;
+
+
+    if(((param_0.flags_0) & 4U) != 0U)
+    {
+
+        d_1 = (_S186.raw_0 * 255.0 - 128.0) / 128.0;
+
+    }
+    else
+    {
+
+        if((_S187 & 8U) != 0U)
+        {
+
+            d_1 = (_S186.raw_0 * 65535.0 - 32768.0) / 32768.0;
+
+        }
+        else
+        {
+
+            d_1 = 2.0 * _S186.raw_0 - 1.0;
+
+        }
+
+    }
+    if((param_0.pixel_0) == 0.0)
+    {
+
+        float _S188 = param_0.slices_0 - 1.0;
+
+        float positive_0 = ceil(_S188 / 2.0);
+
+        float negative_0 = floor(_S188 / 2.0);
+
+        float _S189;
+
+        if(d_1 < 0.0)
+        {
+
+            _S189 = negative_0;
+
+        }
+        else
+        {
+
+            _S189 = positive_0;
+
+        }
+
+        float _S190 = max(1.0, _S189);
+
+        d_1 = round(d_1 * _S190) / _S190;
+
+    }
+    return param_0.span_0 * d_1;
+}
+
+
+Field_0 basic3_0(vec2 _S191, Coord_0 _S192)
+{
+
+    float _S193 = param_0.cycles_0;
+
+    float _S194 = param_0.u_0;
+
+
+    float clock_2 = 2.0 * param_0.cycles_0 * param_0.u_0;
+
+    float t_4;
+    if((param_0.customMap_0) != 0U)
+    {
+
+        if(((param_0.flags_0) & 2U) != 0U)
+        {
+
+            t_4 = _S194 + relative3_0(_S192);
+
+        }
+        else
+        {
+
+            t_4 = _S192.q_1 + clock_2;
+
+        }
+
+        return single3_0(_S191, play3_0(t_4, param_0.playback_0));
+    }
+
+    uint _S195 = param_0.design_0;
+    if((param_0.design_0) == 0U)
+    {
+
+        t_4 = 0.20000000298023224 + 0.80000001192092896 * fract(_S193 * _S194 - _S192.q_1);
+
+    }
+    else
+    {
+
+        if(_S195 == 5U)
+        {
+
+            t_4 = bounce3_0(1.0 - clock_2 - param_0.span_0 * _S192.q_1);
+
+        }
+        else
+        {
+
+            if((param_0.shape_0) == 11U)
+            {
+
+                if((int(_S192.index_1) % 2) == 0)
+                {
+
+                    t_4 = 1.0;
+
+                }
+                else
+                {
+
+                    t_4 = -1.0;
+
+                }
+
+                t_4 = play3_0(1.0 + clock_2 * t_4 - param_0.span_0 * _S192.q_1, param_0.playback_0);
+
+            }
+            else
+            {
+
+                t_4 = play3_0(1.0 + clock_2 - param_0.span_0 * _S192.q_1, param_0.playback_0);
+
+            }
+
+        }
+
+    }
+
+
+
+    return single3_0(_S191, t_4);
+}
+
+
+Field_0 wave3_0(vec2 _S196, Coord_0 _S197)
+{
+
+    bool _S198;
+
+
+    if((param_0.customMap_0) != 0U)
+    {
+
+        _S198 = ((param_0.flags_0) & 2U) != 0U;
+
+    }
+    else
+    {
+
+        _S198 = false;
+
+    }
+
+    float phase_4;
+
+    if(_S198)
+    {
+
+        phase_4 = 2.0 * param_0.cycles_0 * param_0.u_0 + relative3_0(_S197);
+
+    }
+    else
+    {
+
+        phase_4 = 2.0 * param_0.cycles_0 * param_0.u_0 - 2.0 * param_0.density_0 * _S197.q_1;
+
+    }
+    return single3_0(_S196, play3_0(phase_4, param_0.playback_0));
+}
+
+
+float frozenShadow53_0(vec2 _S199, float _S200)
+{
+
+    float _S201 = param_0.outputW_0;
+
+    float _S202 = param_0.outputH_0;
+
+    uint _S203 = param_0.shape_0;
+
+    float _S204 = param_0.shadowSide_0;
+
+    float _S205 = param_0.sampleW_0;
+
+    TFParams_0 geometry_0;
+
+    geometry_0.outTime_0 = param_0.outTime_0;
+
+    geometry_0.u_0 = param_0.u_0;
+
+    geometry_0.sourceDuration_0 = param_0.sourceDuration_0;
+
+    geometry_0.aspect_0 = param_0.aspect_0;
+
+    geometry_0.slices_0 = param_0.slices_0;
+
+    geometry_0.pixel_0 = param_0.pixel_0;
+
+    geometry_0.span_0 = param_0.span_0;
+
+    geometry_0.cycles_0 = param_0.cycles_0;
+
+    geometry_0.cx_0 = param_0.cx_0;
+
+    geometry_0.cy_0 = param_0.cy_0;
+
+    geometry_0.angle_0 = param_0.angle_0;
+
+    geometry_0.turns_0 = param_0.turns_0;
+
+    geometry_0.build_0 = param_0.build_0;
+
+    geometry_0.softness_0 = param_0.softness_0;
+
+    geometry_0.density_0 = param_0.density_0;
+
+    geometry_0.sourceReverse_0 = param_0.sourceReverse_0;
+
+    geometry_0.sourceStart_0 = param_0.sourceStart_0;
+
+    geometry_0.sourceEnd_0 = param_0.sourceEnd_0;
+
+    geometry_0.outputW_0 = param_0.outputW_0;
+
+    geometry_0.outputH_0 = param_0.outputH_0;
+
+    geometry_0.family_0 = param_0.family_0;
+
+    geometry_0.shape_0 = param_0.shape_0;
+
+    geometry_0.design_0 = param_0.design_0;
+
+    geometry_0.ending_0 = param_0.ending_0;
+
+    geometry_0.direction_0 = param_0.direction_0;
+
+    geometry_0.playback_0 = param_0.playback_0;
+
+    geometry_0.origin_0 = param_0.origin_0;
+
+    geometry_0.viewMode_0 = param_0.viewMode_0;
+
+    geometry_0.frames_0 = param_0.frames_0;
+
+    geometry_0.customMap_0 = param_0.customMap_0;
+
+    geometry_0.waveSources_0 = param_0.waveSources_0;
+
+    geometry_0.flags_0 = param_0.flags_0;
+
+    geometry_0.shadowStrength_0 = param_0.shadowStrength_0;
+
+    geometry_0.shadowWidth_0 = param_0.shadowWidth_0;
+
+    geometry_0.shadowSoftness_0 = param_0.shadowSoftness_0;
+
+    geometry_0.shadowSide_0 = param_0.shadowSide_0;
+
+    geometry_0.sampleW_0 = param_0.sampleW_0;
+
+    geometry_0.sampleH_0 = param_0.sampleH_0;
+
+    geometry_0.reserved0_0 = param_0.reserved0_0;
+
+    geometry_0.reserved1_0 = param_0.reserved1_0;
+
+    geometry_0.direction_0 = 0U;
+
+    bool _S206;
+    if((param_0.direction_0) >= 2U)
+    {
+
+        _S206 = _S203 != 8U;
+
+    }
+    else
+    {
+
+        _S206 = false;
+
+    }
+
+    if(_S206)
+    {
+
+        _S206 = _S203 != 10U;
+
+    }
+    else
+    {
+
+        _S206 = false;
+
+    }
+
+    if(_S206)
+    {
+
+        geometry_0.slices_0 = geometry_0.slices_0 * 2.0;
+
+    }
+    Coord_0 c_2 = coordinate3_0(_S199, geometry_0, 0.0);
+    float _S207 = max(2.0, geometry_0.slices_0);
+    if(_S203 == 8U)
+    {
+
+        _S206 = true;
+
+    }
+    else
+    {
+
+        _S206 = _S203 == 10U;
+
+    }
+
+    float cells_0;
+
+    if(_S206)
+    {
+
+        bool _S208 = _S203 == 10U;
+
+        if(_S208)
+        {
+
+            cells_0 = ceil(_S207 / 2.0);
+
+        }
+        else
+        {
+
+            cells_0 = _S207;
+
+        }
+        vec2 grid_1 = gridSize3_0(cells_0, vec2(_S201, _S202));
+        float _S209 = grid_1.x;
+
+        int _S210;
+
+        if((c_2.cell_0.y) < (cells_0 - _S209 * grid_1.y))
+        {
+
+            _S210 = 1;
+
+        }
+        else
+        {
+
+            _S210 = 0;
+
+        }
+        float phase_5 = c_2.frac_0.x;
+
+        float span_1 = _S205 / (_S209 + float(_S210));
+
+        float phase_6;
+
+        float span_2;
+        if(_S208)
+        {
+
+            float cut_1 = 1.0 - c_2.frac_0.y;
+
+            bool first_1 = phase_5 < cut_1;
+            if(first_1)
+            {
+
+                cells_0 = cut_1;
+
+            }
+            else
+            {
+
+                cells_0 = 1.0 - cut_1;
+
+            }
+
+            float span_3 = span_1 * cells_0;
+            if(first_1)
+            {
+
+                cells_0 = phase_5 / max(cut_1, 9.99999997475242708e-07);
+
+            }
+            else
+            {
+
+                cells_0 = (phase_5 - cut_1) / max(1.0 - cut_1, 9.99999997475242708e-07);
+
+            }
+
+            phase_6 = cells_0;
+
+            span_2 = span_3;
+
+        }
+        else
+        {
+
+            phase_6 = phase_5;
+
+            span_2 = span_1;
+
+        }
+
+        if(_S204 > 0.0)
+        {
+
+            cells_0 = phase_6;
+
+        }
+        else
+        {
+
+            cells_0 = 1.0 - phase_6;
+
+        }
+
+        return filteredLight42_0(cells_0, span_2, _S200, 1.0, false);
+    }
+    float phase_7 = clamp(c_2.raw_0 * _S207 - c_2.index_1, 0.0, 1.0);
+    float span_4 = coordSpan42_0(_S199, geometry_0) / _S207;
+    if(_S204 > 0.0)
+    {
+
+        cells_0 = phase_7;
+
+    }
+    else
+    {
+
+        cells_0 = 1.0 - phase_7;
+
+    }
+
+    return filteredLight42_0(cells_0, span_4, _S200, 1.0, false);
+}
+
+
+float coordSpan42_1(vec2 _S211)
+{
+
+    float _S212 = param_0.sampleW_0;
+
+    float _S213 = param_0.sampleH_0;
+
+    vec2 size_2 = vec2(param_0.sampleW_0, param_0.sampleH_0);
+    vec2 _S214 = vec2(param_0.cx_0, param_0.cy_0);
+
+    vec2 v_6 = (_S211 - _S214) * size_2;
+    vec2 radii_3 = max(_S214, 1.0 - _S214) * size_2;
+    if((param_0.customMap_0) != 0U)
+    {
+
+        return min(_S212, _S213);
+    }
+
+    switch(param_0.shape_0)
+    {
+    case 1U:
+        {
+
+            return _S213;
+        }
+    case 2U:
+    case 12U:
+        {
+
+            float a_11 = param_0.angle_0 * 3.1415927410125732 / 180.0;
+            return _S212 * abs(cos(a_11)) + _S213 * abs(sin(a_11));
+        }
+    case 3U:
+        {
+
+            return 3.1415927410125732 * length(v_6);
+        }
+    case 4U:
+        {
+
+            return 6.2831854820251465 * length(v_6);
+        }
+    case 5U:
+    case 14U:
+        {
+
+            return length(radii_3) - length(max(vec2(ivec2(0)), max(- _S214, _S214 - 1.0)) * size_2);
+        }
+    case 6U:
+        {
+
+            return (radii_3.x + radii_3.y) * 0.70710700750350952;
+        }
+    case 7U:
+        {
+
+            return min(radii_3.x, radii_3.y);
+        }
+    case 9U:
+        {
+
+            return min(6.2831854820251465 * length(v_6), length(radii_3) / 1.5);
+        }
+    case 13U:
+        {
+
+            return length(radii_3) * 0.56000000238418579;
+        }
+    default:
+        {
+
+            return _S212;
+        }
+    }
+
+}
+
+
+float stripeLight42_0(float _S215, float _S216, float _S217, float _S218, bool _S219, float _S220)
+{
+
+    float span_5 = _S217 / _S218;
+    if(span_5 <= 1.0)
+    {
+
+        return 1.0;
+    }
+
+    bool leading_0 = (param_0.shadowSide_0) > 0.0;
+
+    float center_2;
+    if(leading_0)
+    {
+
+        center_2 = 0.0;
+
+    }
+    else
+    {
+
+        center_2 = 1.0;
+
+    }
+    float edge_3 = stripeBorder42_0(_S216 + center_2, _S217, _S218);
+    float center_3 = floor(_S215 * _S217) + 0.5;
+    if(_S219)
+    {
+
+        center_2 = _S217 - center_3;
+
+    }
+    else
+    {
+
+        center_2 = center_3;
+
+    }
+    if(leading_0)
+    {
+
+        center_2 = center_2 - edge_3;
+
+    }
+    else
+    {
+
+        center_2 = edge_3 - center_2;
+
+    }
+    return filteredLight42_0(max(0.5, center_2) / span_5, span_5, _S220, 1.0, false);
+}
+
+
+float sliceLight42_0(vec2 _S221, Coord_0 _S222, float _S223)
+{
+
+    uint _S224 = param_0.family_0;
+
+    bool _S225;
+
+    if((param_0.family_0) == 0U)
+    {
+
+        _S225 = (param_0.customMap_0) == 0U;
+
+    }
+    else
+    {
+
+        _S225 = false;
+
+    }
+
+    if(_S225)
+    {
+
+        float _S226 = frozenShadow53_0(_S221, _S223);
+
+        return _S226;
+    }
+    float _S227 = max(2.0, param_0.slices_0);
+
+    uint _S228 = param_0.shape_0;
+    bool _S229 = (param_0.shape_0) == 8U;
+
+    if(_S229)
+    {
+
+        _S225 = true;
+
+    }
+    else
+    {
+
+        _S225 = _S228 == 10U;
+
+    }
+
+    if(_S225)
+    {
+
+        _S225 = (param_0.customMap_0) == 0U;
+
+    }
+    else
+    {
+
+        _S225 = false;
+
+    }
+
+    if(_S225)
+    {
+
+        _S225 = (param_0.direction_0) < 2U;
+
+    }
+    else
+    {
+
+        _S225 = false;
+
+    }
+
+    float cells_1;
+
+    float x_4;
+
+    if(_S225)
+    {
+
+        bool _S230 = _S228 == 10U;
+
+        if(_S230)
+        {
+
+            cells_1 = ceil(_S227 / 2.0);
+
+        }
+        else
+        {
+
+            cells_1 = _S227;
+
+        }
+        vec2 grid_2 = gridSize3_0(cells_1, vec2(param_0.outputW_0, param_0.outputH_0));
+        float _S231 = grid_2.x;
+
+        int _S232;
+
+        if((_S222.cell_0.y) < (cells_1 - _S231 * grid_2.y))
+        {
+
+            _S232 = 1;
+
+        }
+        else
+        {
+
+            _S232 = 0;
+
+        }
+        float x_5 = _S222.frac_0.x;
+        float span_6 = param_0.sampleW_0 / (_S231 + float(_S232));
+
+        float span_7;
+        if(_S230)
+        {
+
+            float cut_2 = 1.0 - _S222.frac_0.y;
+            bool first_2 = x_5 < cut_2;
+            if(first_2)
+            {
+
+                cells_1 = cut_2;
+
+            }
+            else
+            {
+
+                cells_1 = 1.0 - cut_2;
+
+            }
+
+            float span_8 = span_6 * cells_1;
+            if(first_2)
+            {
+
+                cells_1 = x_5 / max(cut_2, 9.99999997475242708e-07);
+
+            }
+            else
+            {
+
+                cells_1 = (x_5 - cut_2) / max(1.0 - cut_2, 9.99999997475242708e-07);
+
+            }
+
+            x_4 = cells_1;
+
+            span_7 = span_8;
+
+        }
+        else
+        {
+
+            x_4 = x_5;
+
+            span_7 = span_6;
+
+        }
+
+        float phase_8;
+
+        if((param_0.direction_0) == 1U)
+        {
+
+            phase_8 = 1.0 - x_4;
+
+        }
+        else
+        {
+
+            phase_8 = x_4;
+
+        }
+        if(_S229)
+        {
+
+            cells_1 = tiledLight42_0(phase_8, span_7, _S223);
+
+        }
+        else
+        {
+
+            cells_1 = edgeLight42_0(phase_8, span_7, _S223);
+
+        }
+
+        return cells_1;
+    }
+
+    float _S233 = coordSpan42_1(_S221);
+
+    uint _S234 = param_0.direction_0;
+
+
+    if((param_0.direction_0) >= 2U)
+    {
+
+        cells_1 = _S233 * 0.5;
+
+    }
+    else
+    {
+
+        cells_1 = _S233;
+
+    }
+    if((param_0.pixel_0) > 0.0)
+    {
+
+        _S225 = _S224 == 2U;
+
+    }
+    else
+    {
+
+        _S225 = false;
+
+    }
+
+    if(_S225)
+    {
+
+        if((param_0.customMap_0) != 0U)
+        {
+
+            _S225 = ((param_0.flags_0) & 2U) != 0U;
+
+        }
+        else
+        {
+
+            _S225 = false;
+
+        }
+
+        if(_S225)
+        {
+
+            x_4 = 2.0 * param_0.span_0;
+
+        }
+        else
+        {
+
+            x_4 = 2.0 * param_0.density_0;
+
+        }
+
+        float _S235 = max(0.0099999997764825821, x_4);
+
+        return tiledLight42_0(fract(_S235 * _S222.raw_0 - 2.0 * param_0.cycles_0 * param_0.u_0), cells_1 / _S235, _S223);
+    }
+    if(isStripe42_1())
+    {
+
+        if(_S228 == 1U)
+        {
+
+            x_4 = _S221.y;
+
+        }
+        else
+        {
+
+            x_4 = _S221.x;
+
+        }
+
+        float _S236 = stripeLight42_0(x_4, _S222.index_1, cells_1, _S227, _S234 == 1U, _S223);
+
+        return _S236;
+    }
+
+    return tiledLight42_0(clamp(_S222.raw_0 * _S227 - _S222.index_1, 0.0, 1.0), cells_1 / _S227, _S223);
+}
+
+
+Field_0 evaluate3_0(vec2 _S237, float _S238)
+{
+
+    if((param_0.design_0) >= 407U)
+    {
+
+        return creative42_0(_S237);
+    }
+
+    Coord_0 _S239 = coordinate3_1(_S237, _S238);
+
+    float base_1;
+
+
+    if((_S239.coverage_0) == 0.0)
+    {
+
+        uint _S240 = param_0.family_0;
+
+        if((param_0.family_0) == 0U)
+        {
+
+            base_1 = play3_0(param_0.u_0 / max(0.10000000149011612, param_0.build_0), param_0.playback_0);
+
+        }
+        else
+        {
+
+            if(_S240 == 1U)
+            {
+
+                base_1 = 1.0;
+
+            }
+            else
+            {
+
+                base_1 = 0.0;
+
+            }
+
+            base_1 = play3_0(base_1 + 2.0 * param_0.cycles_0 * param_0.u_0, param_0.playback_0);
+
+        }
+
+        return single3_0(_S237, base_1);
+    }
+
+    uint _S241 = param_0.family_0;
+
+    if((param_0.family_0) == 3U)
+    {
+
+        return creative3_0(_S237, _S239);
+    }
+
+    Field_0 f_4;
+
+    bool _S242 = _S241 == 0U;
+
+    Field_0 _S243;
+
+    if(_S242)
+    {
+
+        _S243 = frozen3_0(_S237, _S239);
+
+    }
+    else
+    {
+
+        if(_S241 == 1U)
+        {
+
+            _S243 = basic3_0(_S237, _S239);
+
+        }
+        else
+        {
+
+            _S243 = wave3_0(_S237, _S239);
+
+        }
+
+    }
+
+    f_4 = _S243;
+    if((param_0.shadowStrength_0) > 0.0)
+    {
+
+        bool _S244;
+        if(_S242)
+        {
+
+            _S244 = (param_0.u_0) < (clamp(param_0.build_0, 0.10000000149011612, 0.89999997615814209));
+
+        }
+        else
+        {
+
+            _S244 = false;
+
+        }
+
+        if(_S244)
+        {
+
+            base_1 = f_4.weight_0;
+
+        }
+        else
+        {
+
+            base_1 = 1.0;
+
+        }
+        if(base_1 > 0.0)
+        {
+
+            float _S245 = sliceLight42_0(_S237, _S239, base_1);
+
+            f_4.light_0 = _S245;
+
+        }
+
+    }
+
+
+
+    return f_4;
+}
+
+
+float adjusted3_0(float _S246)
+{
+
+    float _S247 = clamp(_S246, 0.0, 1.0);
+
+    float _S248;
+
+    if((param_0.sourceReverse_0) > 0.0)
+    {
+
+        _S248 = 1.0 - _S247;
+
+    }
+    else
+    {
+
+        _S248 = _S247;
+
+    }
+
+    return mix(param_0.sourceStart_0, param_0.sourceEnd_0, _S248);
+}
+
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main()
+{
+
+    bool _S249;
+    if((gl_GlobalInvocationID.x) >= (cfg_0._data[uint(2)]))
+    {
+
+        _S249 = true;
+
+    }
+    else
+    {
+
+        _S249 = (gl_GlobalInvocationID.y) >= (cfg_0._data[uint(3)]);
+
+    }
+
+    if(_S249)
+    {
+
+        return;
+    }
+
+    uint local_3 = gl_GlobalInvocationID.y * cfg_0._data[uint(2)] + gl_GlobalInvocationID.x;
+    vec2 uv_3 = (vec2(gl_GlobalInvocationID.xy + uvec2(cfg_0._data[uint(0)], cfg_0._data[uint(1)])) + 0.5) / vec2(float(cfg_0._data[uint(4)]), float(cfg_0._data[uint(5)]));
+
+    float _S250;
+    if((param_0.customMap_0) != 0U)
+    {
+
+        _S250 = timeMap_0._data[uint(local_3)];
+
+    }
+    else
+    {
+
+        _S250 = 0.0;
+
+    }
+
+    Field_0 _S251 = evaluate3_0(uv_3, _S250);
+    uint _S252 = local_3 * 2U;
+
+    diagnostics_0._data[uint(_S252)] = vec4(adjusted3_0(_S251.a_0), adjusted3_0(_S251.b_0), clamp(_S251.weight_0, 0.0, 1.0), _S251.shade_0);
+    diagnostics_0._data[uint(_S252 + 1U)] = vec4(_S251.light_0, 0.0, 0.0, 0.0);
+    return;
+}

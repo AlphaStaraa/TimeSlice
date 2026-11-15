@@ -1,0 +1,15 @@
+{
+  "name": "时刃 Lite",
+  "englishName": "TimeSlice Lite",
+  "version": "1.0.4-lite.1",
+  "displayVersion": "1.0.4 Lite",
+  "build": 104,
+  "author": "AlphaStar",
+  "license": "AGPL-3.0-only",
+  "price": 0,
+  "effects": 46,
+  "catalogueEntries": 35,
+  "gpuGrade": true,
+  "bundleIdentifier": "studio.timeslice.lite.mac",
+  "profile": "lite"
+}

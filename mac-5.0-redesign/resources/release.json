@@ -1,0 +1,19 @@
+{
+  "name": "时刃",
+  "version": "1.0.4",
+  "displayVersion": "1.0.4 完整版",
+  "build": 104,
+  "author": "AlphaStar",
+  "license": "AGPL-3.0-only",
+  "price": 0,
+  "effects": 46,
+  "catalogueEntries": 35,
+  "sourceAvailable": true,
+  "openSource": true,
+  "englishName": "TimeSlice",
+  "releaseChannel": "testing",
+  "baseline": "Mac 5.4.2",
+  "gpuGrade": true,
+  "platform": "macOS",
+  "bundleIdentifier": "studio.timeslice.mac"
+}

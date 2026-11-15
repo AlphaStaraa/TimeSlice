@@ -1,0 +1,28 @@
+name: 问题报告 / Bug report
+description: 报告启动、预览、导出或界面问题
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: 软件版本、系统、CPU/GPU、内存或手机型号
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 包括素材规格、效果参数与输出规格；不要上传私人原片
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期与实际表现 / Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 日志或截图 / Logs or screenshots
+      description: 请先移除密钥、个人目录和私人内容

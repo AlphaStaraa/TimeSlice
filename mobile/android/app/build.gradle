@@ -1,0 +1,24 @@
+plugins { id 'com.android.application' }
+def releaseInfo = new groovy.json.JsonSlurper().parse(file('../../android-release.json').exists() ? file('../../android-release.json') : file('../../../release.json'))
+android {
+ namespace 'studio.shiren.mobile'
+ compileSdk 36
+ defaultConfig {
+  applicationId 'studio.shiren.mobile'
+  minSdk 29
+  targetSdk 36
+  versionCode releaseInfo.build as int
+  versionName releaseInfo.version
+  ndk { abiFilters 'arm64-v8a', 'x86_64' }
+  externalNativeBuild { cmake { arguments '-DANDROID_STL=c++_static' } }
+ }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
+ packaging { jniLibs { useLegacyPackaging true } }
+ sourceSets { main { jniLibs.srcDirs = [] } }
+ externalNativeBuild { cmake { path file('CMakeLists.txt') } }
+}
+
+dependencies {
+ implementation 'org.jcodec:jcodec:0.2.5'
+ implementation 'org.opencv:opencv:4.13.0'
+}
