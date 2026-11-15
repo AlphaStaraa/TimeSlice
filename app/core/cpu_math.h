@@ -8,6 +8,8 @@ struct float2 {float x,y;/* 建立二维向量的分量。 */ float2(float a=0):
 OP(+) OP(-) OP(*) OP(/)
 #undef OP
 inline float2 operator-(float2 a){return {-a.x,-a.y};}
+// 引入浮点绝对值重载，避免坐标被隐式转换为整数。
+using std::abs;
 inline float2 abs(float2 a){return {abs(a.x),abs(a.y)};}
 inline float min(float a,float b){return std::min(a,b);} inline float max(float a,float b){return std::max(a,b);}
 inline uint min(uint a,uint b){return std::min(a,b);} inline uint max(uint a,uint b){return std::max(a,b);}
