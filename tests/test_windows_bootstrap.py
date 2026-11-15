@@ -29,7 +29,7 @@ class WindowsBootstrapTests(unittest.TestCase):
 
     def long_dependency(self):
         """创建会超过 Qt 常见路径上限的依赖目录。"""
-        dependency = self.source / "runtime" / ("q" * 55) / ("r" * 55) / ("s" * 55) / "plugin.dll"
+        dependency = self.source / "runtime" / ("q" * (220 - len(str(self.source)))) / "plugin.dll"
         dependency.parent.mkdir(parents=True)
         dependency.write_bytes(b"qt-plugin-fixture")
         return dependency
