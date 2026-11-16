@@ -1,8 +1,8 @@
 {
   "name": "时刃",
-  "version": "1.0.7-preview.1",
-  "displayVersion": "1.0.7 预览",
-  "build": 107,
+  "version": "1.0.8-memory-preview.1",
+  "displayVersion": "1.0.8 预览",
+  "build": 108,
   "author": "AlphaStar",
   "license": "AGPL-3.0-only",
   "price": 0,

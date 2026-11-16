@@ -25,9 +25,9 @@ The current release candidates are **test builds**. Once published, choose an ar
 
 | Platform | Version | Requirements |
 | --- | --- | --- |
-| macOS full | 1.0.7 | Apple Silicon, macOS14+ |
-| macOS Lite | 1.0.7-lite.1 | Apple Silicon, macOS14+ |
-| Windows | 1.0.7-preview.1 | Windows10 22H2 / 11, x64 |
+| macOS full | 1.0.8 | Apple Silicon, macOS14+ |
+| macOS Lite | 1.0.8-lite.1 | Apple Silicon, macOS14+ |
+| Windows | 1.0.8-memory-preview.1 | Windows10 22H2 / 11, x64 |
 | Android | 1.0.5-hdr-preview.1 | Android10+ for 8-bit; Android13+ with P010 for 10-bit/HDR |
 
 Extract the full archive before launching. Import a video, select an effect and choose an output folder before your first export. Android supports the gallery or a chosen folder.

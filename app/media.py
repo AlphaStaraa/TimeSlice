@@ -152,6 +152,31 @@ def check(cancel):
         raise Cancelled("已取消；已完成的视频保留。")
 
 
+def rgb10_peak_code(path, cancel=None, block_bytes=8_000_000):
+    """逐块扫描RGB10最高代码值，不将整段HDR缓存映射进进程工作集。"""
+    block_bytes = int(block_bytes) // 4 * 4
+    if block_bytes < 4:
+        raise ValueError("高精度扫描分块必须至少包含一个像素")
+    maximum = 0
+    with Path(path).open("rb") as stream:
+        while True:
+            check(cancel)
+            raw = stream.read(block_bytes)
+            if not raw:
+                break
+            if len(raw) % 4:
+                raise ValueError("高精度缓存字节不完整")
+            block = np.frombuffer(raw, dtype="<u4")
+            maximum = max(
+                maximum,
+                int(((block >> 20) & 1023).max()),
+                int(((block >> 10) & 1023).max()),
+                int((block & 1023).max()),
+            )
+            del block
+    return maximum
+
+
 class FrameCache:
     # 建立对象所需的状态、资源句柄和默认配置。
     def __init__(self, folder, meta):
@@ -237,20 +262,7 @@ class FrameCache:
                     raise ValueError("解码的视频帧不完整。")
                 partial.replace(target)
                 if high and color["hdr"]:
-                    packed = np.memmap(target, mode="r", dtype="<u4")
-                    maximum = 0
-                    try:
-                        for position in range(0, len(packed), 2_000_000):
-                            check(cancel)
-                            block = packed[position : position + 2_000_000]
-                            maximum = max(
-                                maximum,
-                                int(((block >> 20) & 1023).max()),
-                                int(((block >> 10) & 1023).max()),
-                                int((block & 1023).max()),
-                            )
-                    finally:
-                        packed._mmap.close()
+                    maximum = rgb10_peak_code(target, cancel)
                     if color["transfer"] == "smpte2084":
                         from precision_pixels import pq_decode
 

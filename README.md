@@ -17,6 +17,7 @@
 - **视频处理**：完整版提供固定机位稳定、三级去闪、首尾调色/HSL；已处理素材缓存可供导出复用。
 - **10位与HDR**：真正RGB10缓存、浮点合成和Main10输出；支持10位SDR、PQ和HLG，HDR预览以SDR映射显示。
 - **导出画质**：按实际输出尺寸/帧率推荐码率，也可自定义1–500 Mbps；导出默认开启平滑渐变。
+- **大源内存读取**：Windows GPU长源导出自动按块读文件；HDR峰值按8MB扫描，完整源样本保留，见[内存优化](docs/HDR内存优化_1.0.8.md)。
 - **独立Lite版**：专注视频导入、切片与输出，界面和依赖更少。
 
 ![效果示例](docs/media/effects.gif)
@@ -27,9 +28,9 @@
 
 | 平台 | 当前版本 | 要求 |
 | --- | --- | --- |
-| Mac完整版 | 1.0.7 | Apple Silicon、macOS14+ |
-| Mac Lite | 1.0.7-lite.1 | Apple Silicon、macOS14+ |
-| Windows | 1.0.7-preview.1 | Windows10 22H2 / 11，x64 |
+| Mac完整版 | 1.0.8 | Apple Silicon、macOS14+ |
+| Mac Lite | 1.0.8-lite.1 | Apple Silicon、macOS14+ |
+| Windows | 1.0.8-memory-preview.1 | Windows10 22H2 / 11，x64 |
 | Android | 1.0.5-hdr-preview.1 | 8位Android10+；10位/HDR需Android13+及P010支持 |
 
 完整解压后启动软件，导入视频，选择效果。**首次导出时自行选择保存目录**。Android可保存到相册或自选目录。

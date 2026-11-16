@@ -18,10 +18,101 @@ from render import gpu_tile
 
 STAGING_GROUP_BYTES = 256 * 1024**2
 SOURCE_PARALLEL_BYTES = 64 * 1024**2
+WINDOWS_FILE_TILES = sys.platform == "win32"
+SOURCE_FILE_MIN_BYTES = 4 * 1024**3
+SOURCE_FILE_BLOCK_BYTES = 256 * 1024**2
+
+
+def mapped_source_file(cache):
+    """定位完整只读帧映射的文件偏移，支持连续时间子视图并保留写时复制语义。"""
+    data = cache.data
+    if not (
+        isinstance(data, np.memmap)
+        and data.mode == "r"
+        and data.dtype == np.uint8
+        and data.ndim == 4
+        and data.flags.c_contiguous
+        and data.shape == (len(data), cache.height, cache.width, 4)
+    ):
+        return None
+    base = data
+    while isinstance(base.base, np.ndarray):
+        base = base.base
+    if not isinstance(base, np.memmap) or base.filename is None:
+        return None
+    offset = int(base.offset) + int(data.ctypes.data) - int(base.ctypes.data)
+    return (base.filename, offset) if offset >= 0 else None
+
+
+def pack_source_file_tile(cache, x, y, width, height, pool, workers, cancel):
+    """用有界文件读取整理时间块，避免大只读映射页面在Windows工作集中累积。"""
+    source = mapped_source_file(cache)
+    if source is None:
+        raise ValueError("源时间缓存不支持只读文件分块")
+    if not (0 <= x < cache.width and 0 <= y < cache.height):
+        raise ValueError("源分块起点超出画面")
+    if not (0 < width <= cache.width - x and 0 < height <= cache.height - y):
+        raise ValueError("源分块尺寸超出画面")
+    count = len(cache.data)
+    if count * height * width * 4 > SOURCE_FILE_BLOCK_BYTES:
+        raise ValueError("源分块超过安全内存预算")
+    check(cancel)
+    output = np.empty((count, height, width, 4), np.uint8)
+    filename, offset = source
+    row_bytes = cache.width * 4
+    frame_bytes = cache.height * row_bytes
+
+    def read_frames(first, last):
+        """每线程独立句柄，补齐短读，并在每帧和每次读取前响应取消。"""
+        with open(filename, "rb", buffering=0) as stream:
+            for frame in range(first, last):
+                check(cancel)
+                target = memoryview(output[frame]).cast("B")
+                position = offset + frame * frame_bytes + y * row_bytes + x * 4
+                groups = (
+                    ((position, target),)
+                    if width == cache.width
+                    else (
+                        (
+                            position + row * row_bytes,
+                            target[row * width * 4 : (row + 1) * width * 4],
+                        )
+                        for row in range(height)
+                    )
+                )
+                for source_position, destination in groups:
+                    stream.seek(source_position)
+                    done = 0
+                    while done < len(destination):
+                        check(cancel)
+                        received = stream.readinto(destination[done:])
+                        if not received:
+                            raise ValueError("源时间缓存不完整，已停止读取")
+                        done += received
+
+    if workers < 2 or output.nbytes < SOURCE_PARALLEL_BYTES:
+        read_frames(0, count)
+    else:
+        step = math.ceil(count / workers)
+        pending = [
+            pool.submit(read_frames, first, min(first + step, count))
+            for first in range(0, count, step)
+        ]
+        for future in pending:
+            future.result()
+            check(cancel)
+    check(cancel)
+    return output
 
 
 def pack_source_tile(cache, x, y, width, height, pool, workers, cancel):
     """大源块按互不重叠的时间段并行整理，保持帧序与原始像素不变。"""
+    if (
+        WINDOWS_FILE_TILES
+        and cache.data.nbytes > SOURCE_FILE_MIN_BYTES
+        and mapped_source_file(cache) is not None
+    ):
+        return pack_source_file_tile(cache, x, y, width, height, pool, workers, cancel)
     view = cache.data[:, y : y + height, x : x + width]
     if workers < 2 or view.nbytes < SOURCE_PARALLEL_BYTES:
         return np.ascontiguousarray(view)
