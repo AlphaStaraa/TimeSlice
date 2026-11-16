@@ -87,6 +87,8 @@ DEFAULTS = dict(
     quality="full",
     keepAudio=True,
     encoder="auto",
+    bitrateMbps=0,
+    gradientDither=True,
     smooth=False,
 )
 if MAC42:
@@ -226,6 +228,8 @@ def params(e, s, w, h, u, source_duration, frames, view=0):
     )
     if split:
         flags |= 1024
+    if s.get("_exportDither", False):
+        flags |= 4096
     ints = [
         e["family"],
         e["shape"],

@@ -1,5 +1,6 @@
 #define atan2 atan2
 #include "field_common.h"
+#include "quantization.h"
 [[vk::binding(0,0)]] ConstantBuffer<TFParams> param;
 // tile x/y/width/height; full W/H, source frames, first output frame;
 // batch length, output frame count, mode, reserved
@@ -109,6 +110,7 @@
  else if(p.viewMode==2){float n=adjusted3(lerp(clamp(f.a,0.f,1.f),clamp(f.b,0.f,1.f),clamp(f.weight,0.f,1.f)),p);color=float4(n,n,n,1);}
  else {float4 a=sampleSource(f.a,local,p),b=sampleSource(f.b,local,p);b.rgb*=f.shade;color=float4(lerp(a.rgb,b.rgb,clamp(f.weight,0.f,1.f)),1);}
 #endif
+ if((p.flags&4096u)!=0){float noise=gradientOffset105(id.x+cfg[0],id.y+cfg[1])/255.f;color.rgb=clamp(color.rgb,0.f,1.f)+noise;}
  output[(id.z*cfg[3]+id.y)*cfg[2]+id.x]=pack(color);
 }
 // Diagnostic field, used for CPU/GPU equivalence and warped fold sampling.

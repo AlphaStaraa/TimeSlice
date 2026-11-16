@@ -51,6 +51,22 @@ public final class UiReviewInstrumentation extends Instrumentation {
         if(node instanceof ViewGroup){ViewGroup group=(ViewGroup)node;for(int i=0;i<group.getChildCount();i++){View found=find(group.getChildAt(i),text);if(found!=null)return found;}}
         return null;
     }
+    /** 按可访问名称寻找真实控件，验证用户可直接修改目标码率。 */
+    View described(View node,String name){
+        if(name.contentEquals(node.getContentDescription()==null?"":node.getContentDescription()))return node;
+        if(node instanceof ViewGroup){ViewGroup group=(ViewGroup)node;for(int i=0;i<group.getChildCount();i++){View match=described(group.getChildAt(i),name);if(match!=null)return match;}}
+        return null;
+    }
+    /** 用真实控件切换推荐和自定义，码率修改不得重建源缓存。 */
+    void verifyBitrate()throws Exception{
+        Object cache=app.preparedCache;
+        runOnMainSync(()->{app.bitrate=0;app.panels.showExport();Spinner mode=(Spinner)described(app.inspectorDialog.getWindow().getDecorView(),app.t("码率","Bitrate"));if(mode==null)throw new AssertionError("Bitrate mode missing");mode.setSelection(1);});
+        waitFor(()->app.bitrate>0,5000);
+        runOnMainSync(()->{EditText input=(EditText)described(app.inspectorDialog.getWindow().getDecorView(),app.t("目标码率（Mbps）","Target bitrate (Mbps)"));if(input==null)throw new AssertionError("Custom bitrate missing");input.requestFocus();input.setText("37.5");input.clearFocus();});
+        waitFor(()->app.bitrate==37500000,5000);
+        if(app.preparedCache!=cache)throw new Exception("Bitrate change rebuilt source");
+    }
+
     /** 使用标准返回键关闭当前产品弹窗。 */
     void back()throws Exception{try(ParcelFileDescriptor fd=getUiAutomation().executeShellCommand("input keyevent 4");InputStream in=new ParcelFileDescriptor.AutoCloseInputStream(fd)){while(in.read()!=-1){}}Thread.sleep(120);}
     /** 前台启动避免设备冻结后台仪器化。 */
@@ -85,7 +101,7 @@ public final class UiReviewInstrumentation extends Instrumentation {
                     runOnMainSync(()->app.showInspector(1));capture(tone+"-"+locale+"-effect");runOnMainSync(()->app.inspectorDialog.dismiss());
                     runOnMainSync(()->app.showInspector(2));capture(tone+"-"+locale+"-shadow");runOnMainSync(()->app.inspectorDialog.dismiss());
                     runOnMainSync(()->{app.panels.sourcePage=0;app.showInspector(0);});capture(tone+"-"+locale+"-source");runOnMainSync(()->app.inspectorDialog.dismiss());
-                    runOnMainSync(()->app.panels.showExport());capture(tone+"-"+locale+"-export");runOnMainSync(()->app.inspectorDialog.dismiss());
+                    verifyBitrate();capture(tone+"-"+locale+"-export");runOnMainSync(()->app.inspectorDialog.dismiss());
                     final Dialog[] about={null};runOnMainSync(()->about[0]=PhoneAbout.show(app));capture(tone+"-"+locale+"-about");
                     View license=find(about[0].getWindow().getDecorView(),app.t("开源许可与声明","License & notices"));if(license==null)throw new Exception("License action missing");
                     runOnMainSync(license::performClick);capture(tone+"-"+locale+"-license");
@@ -110,11 +126,11 @@ public final class UiReviewInstrumentation extends Instrumentation {
                 final Effect effect=target;if(effect==null)throw new Exception("Fan variant missing");
                 runOnMainSync(()->{app.selectVariant(effect.id);app.playing=false;app.u=.63f;app.version++;app.requestPreview();});waitFor(()->!app.pending.get(),10000);capture(key+"-real-preview");
             }
-            runOnMainSync(()->{app.english=false;app.selected.clear();app.selected.add(100);app.settings.get(100).seconds=.5f;app.fps=24;app.beginExport();});
+            runOnMainSync(()->{app.english=false;app.selected.clear();app.selected.add(100);app.settings.get(100).seconds=.5f;app.fps=24;app.bitrate=8000000;app.beginExport();});
             waitFor(()->!app.busy&&app.lastOutput!=null,120000);
             File output=new File(directory,"real-UI-export.mp4");
             try(InputStream in=getTargetContext().getContentResolver().openInputStream(app.lastOutput);OutputStream out=new FileOutputStream(output)){byte[] block=new byte[65536];int n;while((n=in.read(block))!=-1)out.write(block,0,n);}publish(output,"video/mp4");
-            report.put("passed",true).put("originalSource","Shanghai20.mov").put("sourceResolution",app.source.width+"x"+app.source.height).put("sourceSeconds",app.source.durationUs/1e6).put("sourceSamples",24).put("realExport",true).put("themes",2).put("languages",2).put("licenseTextDisplayed",true).put("thirdPartyNoticesDisplayed",true).put("noErrorDialogs",true).put("videoOnly",true).put("photoClassesAbsent",true).put("oneTapRemoved",true);
+            report.put("passed",true).put("originalSource","Shanghai20.mov").put("sourceResolution",app.source.width+"x"+app.source.height).put("sourceSeconds",app.source.durationUs/1e6).put("sourceSamples",24).put("realExport",true).put("customBitrateMbps",8).put("manualInputMbps",37.5).put("gradientDither",true).put("themes",2).put("languages",2).put("licenseTextDisplayed",true).put("thirdPartyNoticesDisplayed",true).put("noErrorDialogs",true).put("videoOnly",true).put("photoClassesAbsent",true).put("oneTapRemoved",true);
         }catch(Throwable error){try{report.put("passed",false).put("error",android.util.Log.getStackTraceString(error));}catch(Exception ignored){}}
         finally{
             if(app!=null)runOnMainSync(()->{app.getPreferences(0).edit().putInt("appearance",oldAppearance).apply();app.english=oldEnglish;app.buildUI();});

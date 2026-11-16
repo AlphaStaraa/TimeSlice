@@ -15,7 +15,7 @@ public final class ExportSafety {
 
     /* 分开检查尺寸、帧率和目标码率，不能只看手机能否播放4K。 */
     public static Assessment inspect(int w,int h,int fps,int bitrate,int samples,float seconds){
-        Assessment result=new Assessment();int bits=bitrate>0?bitrate:Math.max(2000000,(int)(w*(long)h*fps*.15));
+        Assessment result=new Assessment();int bits=ExportQuality.resolve(w,h,fps,bitrate);
         result.highLoad=Math.max(w,h)>=2560||fps>=50||bits>=35000000;
         result.targetBytes=(long)(bits/8.*seconds);result.cacheBytes=(long)w*h*4*samples;
         for(MediaCodecInfo codec:new MediaCodecList(MediaCodecList.REGULAR_CODECS).getCodecInfos()){

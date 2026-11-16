@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+from export_quality import target_bitrate
 from model import ROOT, dimensions
 from PIL import Image
 
@@ -245,11 +246,11 @@ def time_map(path, w, h, relative=False):
 
 
 ENCODERS = {
-    "h264_videotoolbox": ["-c:v", "h264_videotoolbox", "-b:v", "20M"],
-    "h264_nvenc": ["-c:v", "h264_nvenc", "-cq", "19", "-b:v", "0"],
-    "h264_qsv": ["-c:v", "h264_qsv", "-global_quality", "19"],
-    "h264_amf": ["-c:v", "h264_amf", "-quality", "quality", "-b:v", "20M"],
-    "libx264": ["-c:v", "libx264", "-crf", "18", "-preset", "medium"],
+    "h264_videotoolbox": ["-c:v", "h264_videotoolbox"],
+    "h264_nvenc": ["-c:v", "h264_nvenc", "-rc", "vbr"],
+    "h264_qsv": ["-c:v", "h264_qsv"],
+    "h264_amf": ["-c:v", "h264_amf", "-quality", "quality"],
+    "libx264": ["-c:v", "libx264", "-preset", "medium"],
 }
 _encoder_cache = {}
 
@@ -294,7 +295,10 @@ def choose_encoder(mode="auto"):
 
 
 # 组合原始帧输入、音频映射、编码质量和封装参数。
-def encode_args(w, h, fps, duration, output, encoder, info, audio, input_path="pipe:0"):
+def encode_args(
+    w, h, fps, duration, output, encoder, info, audio, input_path="pipe:0", bitrate_mbps=0
+):
+    bits = target_bitrate(w, h, fps, bitrate_mbps)
     args = [
         ffmpeg(),
         "-hide_banner",
@@ -330,6 +334,15 @@ def encode_args(w, h, fps, duration, output, encoder, info, audio, input_path="p
     else:
         args += ["-an"]
     args += ENCODERS[encoder] + [
+        "-b:v",
+        str(bits),
+        "-maxrate",
+        str(round(bits * 1.5)),
+        "-bufsize",
+        str(bits * 2),
+        "-vf",
+        "scale=iw:ih:out_color_matrix=bt709:in_range=pc:out_range=tv:"
+        "flags=accurate_rnd+full_chroma_int:sws_dither=ed",
         "-pix_fmt",
         "yuv420p",
         "-color_primaries",
@@ -338,6 +351,8 @@ def encode_args(w, h, fps, duration, output, encoder, info, audio, input_path="p
         "bt709",
         "-colorspace",
         "bt709",
+        "-color_range",
+        "tv",
         "-movflags",
         "+faststart",
         "-t",

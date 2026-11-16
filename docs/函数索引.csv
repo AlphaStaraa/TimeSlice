@@ -1,10 +1,10 @@
 ﻿文件,行号,函数,说明
 app/controller.py,18,Controller.setOutput,验证本机导出目录并记住用户选择。
 app/controller.py,24,Controller.startRender,检查素材与目标位置后启动批量导出。
-app/controller.py,64,Controller.startRender.work,在线程池中执行耗时工作，并向界面线程投递结果或异常。
-app/controller.py,77,Controller.cancelRender,通知后台取消任务并保留已经完成的成片。
-app/controller.py,84,Controller.openOutput,在系统文件管理器中显示已完成输出或选定目录。
-app/controller.py,91,Controller.shutdown,停止后台任务并依次关闭缓存、线程和渲染设备。
+app/controller.py,73,Controller.startRender.work,在线程池中执行耗时工作，并向界面线程投递结果或异常。
+app/controller.py,86,Controller.cancelRender,通知后台取消任务并保留已经完成的成片。
+app/controller.py,93,Controller.openOutput,在系统文件管理器中显示已完成输出或选定目录。
+app/controller.py,100,Controller.shutdown,停止后台任务并依次关闭缓存、线程和渲染设备。
 app/controller_media.py,16,SourceController.detect,检测可用渲染设备并把结果通知界面。
 app/controller_media.py,27,SourceController.log,把诊断信息追加到本机日志。
 app/controller_media.py,33,SourceController.receive,在界面线程接收后台事件并更新任务与预览状态。
@@ -21,22 +21,22 @@ app/controller_preview.py,68,PreviewController.pause,停止预览计时器，保
 app/controller_preview.py,73,PreviewController.tick,依据经过的时间推进预览，而非依赖固定帧计数。
 app/controller_preview.py,84,PreviewController.request_preview,合并预览请求，后台计算后仅采用最新版本的结果。
 app/controller_preview.py,100,PreviewController.request_preview.work,在线程池中执行耗时工作，并向界面线程投递结果或异常。
-app/controller_state.py,36,ControllerState.__init__,建立对象所需的状态、资源句柄和默认配置。
-app/controller_state.py,116,ControllerState.state,返回控制器当前状态供界面绑定。
-app/controller_state.py,121,ControllerState.assets,返回界面资源所在的本机 URL。
-app/controller_state.py,125,ControllerState.sync,从当前选择与参数重建界面状态，保持底层效果配置一致。
-app/controller_state.py,192,ControllerState.format_time,把秒数格式化为时间码。
-app/controller_state.py,197,ControllerState.setFamily,切换效果分类并更新可见卡片。
-app/controller_state.py,205,ControllerState.searchEffects,按查询文本筛选效果库。
-app/controller_state.py,211,ControllerState.setActive,切换当前效果并请求与新参数对应的预览。
-app/controller_state.py,223,ControllerState.setMovement,在当前形状内切换流动方式并保留可用方向。
-app/controller_state.py,239,ControllerState.setOrientation,切换当前形状内的方向或排列。
-app/controller_state.py,248,ControllerState.toggleCatalogue,勾选或取消当前形状的导出组合。
-app/controller_state.py,261,ControllerState.toggleEffect,切换一个原始效果是否加入批量导出。
-app/controller_state.py,270,ControllerState.selectFamily,切换当前系列的整体选择状态。
-app/controller_state.py,281,ControllerState.setSetting,校验并更新参数，仅对相关的预览或缓存发起刷新。
-app/controller_state.py,321,ControllerState.resetSettings,恢复当前效果的默认配置并刷新画面。
-app/controller_state.py,329,ControllerState.dismissError,清除界面当前错误提示。
+app/controller_state.py,37,ControllerState.__init__,建立对象所需的状态、资源句柄和默认配置。
+app/controller_state.py,117,ControllerState.state,返回控制器当前状态供界面绑定。
+app/controller_state.py,122,ControllerState.assets,返回界面资源所在的本机 URL。
+app/controller_state.py,126,ControllerState.sync,从当前选择与参数重建界面状态，保持底层效果配置一致。
+app/controller_state.py,204,ControllerState.format_time,把秒数格式化为时间码。
+app/controller_state.py,209,ControllerState.setFamily,切换效果分类并更新可见卡片。
+app/controller_state.py,217,ControllerState.searchEffects,按查询文本筛选效果库。
+app/controller_state.py,223,ControllerState.setActive,切换当前效果并请求与新参数对应的预览。
+app/controller_state.py,235,ControllerState.setMovement,在当前形状内切换流动方式并保留可用方向。
+app/controller_state.py,251,ControllerState.setOrientation,切换当前形状内的方向或排列。
+app/controller_state.py,260,ControllerState.toggleCatalogue,勾选或取消当前形状的导出组合。
+app/controller_state.py,273,ControllerState.toggleEffect,切换一个原始效果是否加入批量导出。
+app/controller_state.py,282,ControllerState.selectFamily,切换当前系列的整体选择状态。
+app/controller_state.py,293,ControllerState.setSetting,校验并更新参数，仅对相关的预览或缓存发起刷新。
+app/controller_state.py,350,ControllerState.resetSettings,恢复当前效果的默认配置并刷新画面。
+app/controller_state.py,358,ControllerState.dismissError,清除界面当前错误提示。
 app/core/engine.py,18,CPUEngine.__init__,建立对象所需的状态、资源句柄和默认配置。
 app/core/engine.py,33,CPUEngine.field,计算逐像素的时间、混合权重与采样坐标。
 app/core/engine.py,47,CPUEngine.frame,按当前时间与效果生成一帧画面。
@@ -61,39 +61,43 @@ app/core/reference.py,89,timeline,读取原 PR 时间线结构并整理可用轨
 app/core/reference.py,116,ReferenceRenderer.__init__,建立对象所需的状态、资源句柄和默认配置。
 app/core/reference.py,135,ReferenceRenderer.frame,按当前时间与效果生成一帧画面。
 app/core/reference.py,180,ReferenceRenderer.close,关闭当前对象持有的资源，避免重复占用文件、线程或设备。
-app/media.py,18,run,执行当前任务的主流程并把结果或失败交给调用方。
-app/media.py,23,popen,以平台兼容的选项启动异步子进程。
-app/media.py,28,stop_process,关闭管道并终止未退出的子进程，防止编码器残留。
-app/media.py,46,ffmpeg,优先返回安装包内的 FFmpeg，否则使用项目依赖提供的可执行文件。
-app/media.py,56,probe,解析本机视频的尺寸、时长、帧率与音轨，拒绝不能正确处理的素材。
-app/media.py,115,check,检查取消标志或输入约束，必要时中止当前任务。
-app/media.py,122,FrameCache.__init__,建立对象所需的状态、资源句柄和默认配置。
-app/media.py,138,FrameCache.create,建立缓存或底层资源，成功后才向调用方公开完整结果。
-app/media.py,214,FrameCache.close,关闭当前对象持有的资源，避免重复占用文件、线程或设备。
-app/media.py,220,FrameCache.discard,关闭并删除可重建的临时缓存，不触及输入素材。
-app/media.py,226,time_map,读取黑白时间图并转换为指定分辨率的归一化取样场。
-app/media.py,258,choose_encoder,探测硬件编码器并在不可用时回退到软件编码。
-app/media.py,297,encode_args,组合原始帧输入、音频映射、编码质量和封装参数。
+app/export_quality.py,8,recommended_bitrate,按像素面积与帧率推荐Mbps，横竖屏相同，兼顾渐变和切片细节。
+app/export_quality.py,18,validate_bitrate,0代表推荐码率；手动值必须有限且处于1–500Mbps，不接受布尔值。
+app/export_quality.py,28,target_bitrate,解析自动或手动目标，返回编码器使用的每秒比特数。
+app/export_quality.py,34,bitrate_report,记录实际采用的目标，VBR实际文件码率可能低于目标，不伪报成实测值。
+app/media.py,19,run,执行当前任务的主流程并把结果或失败交给调用方。
+app/media.py,24,popen,以平台兼容的选项启动异步子进程。
+app/media.py,29,stop_process,关闭管道并终止未退出的子进程，防止编码器残留。
+app/media.py,47,ffmpeg,优先返回安装包内的 FFmpeg，否则使用项目依赖提供的可执行文件。
+app/media.py,57,probe,解析本机视频的尺寸、时长、帧率与音轨，拒绝不能正确处理的素材。
+app/media.py,116,check,检查取消标志或输入约束，必要时中止当前任务。
+app/media.py,123,FrameCache.__init__,建立对象所需的状态、资源句柄和默认配置。
+app/media.py,139,FrameCache.create,建立缓存或底层资源，成功后才向调用方公开完整结果。
+app/media.py,215,FrameCache.close,关闭当前对象持有的资源，避免重复占用文件、线程或设备。
+app/media.py,221,FrameCache.discard,关闭并删除可重建的临时缓存，不触及输入素材。
+app/media.py,227,time_map,读取黑白时间图并转换为指定分辨率的归一化取样场。
+app/media.py,259,choose_encoder,探测硬件编码器并在不可用时回退到软件编码。
+app/media.py,298,encode_args,组合原始帧输入、音频映射、编码质量和封装参数。
 app/model.py,26,effect_group,确定原始效果所属形状组，独立效果统一包装为单项。
 app/model.py,38,group_variant,在形状组中查找指定原始效果的运动与方向配置。
 app/model.py,43,group_motions,按原始顺序返回当前形状支持的运动类型。
 app/model.py,48,group_orientations,返回指定运动下支持的排列方向。
 app/model.py,53,library_groups,按分类返回供效果库展示的形状组。
-app/model.py,103,default_settings,为指定效果建立独立的默认设置副本。
-app/model.py,111,dimensions,按长边缩放并保持宽高比，输出适合编码的偶数尺寸。
-app/model.py,118,center,将中心偏移与几何原点组合为实际取样中心。
-app/model.py,128,limit,按几何形状和输出像素尺寸计算切片数量上限。
-app/model.py,159,density,解析推荐、自定或像素细分模式并限制有效切片数量。
-app/model.py,182,duration,获取效果显式时长，未设置时使用效果推荐值。
-app/model.py,187,params,把效果与设置编码为 CPU/GPU 共用参数布局。
-app/render.py,17,gpu_tile,根据帧数与显存绑定限制计算安全的空间分块尺寸。
-app/render.py,37,RenderJob.__init__,建立对象所需的状态、资源句柄和默认配置。
-app/render.py,46,RenderJob.update,更新当前任务状态并把进度通知上层。
-app/render.py,50,RenderJob.encoder_args,为编码命令附加可读取的进度输出配置。
-app/render.py,56,RenderJob.wait_for_encoder,等待编码器结束并读取封装进度，期间响应取消。
-app/render.py,79,RenderJob.prepare_cache,准备可供正式合成读取的素材缓存并报告处理结果。
-app/render.py,90,RenderJob.create_engine,按用户选择建立 GPU 或 CPU 渲染器，必要时回退。
-app/render.py,101,RenderJob.run,执行当前任务的主流程并把结果或失败交给调用方。
+app/model.py,105,default_settings,为指定效果建立独立的默认设置副本。
+app/model.py,113,dimensions,按长边缩放并保持宽高比，输出适合编码的偶数尺寸。
+app/model.py,120,center,将中心偏移与几何原点组合为实际取样中心。
+app/model.py,130,limit,按几何形状和输出像素尺寸计算切片数量上限。
+app/model.py,161,density,解析推荐、自定或像素细分模式并限制有效切片数量。
+app/model.py,184,duration,获取效果显式时长，未设置时使用效果推荐值。
+app/model.py,189,params,把效果与设置编码为 CPU/GPU 共用参数布局。
+app/render.py,18,gpu_tile,根据帧数与显存绑定限制计算安全的空间分块尺寸。
+app/render.py,38,RenderJob.__init__,建立对象所需的状态、资源句柄和默认配置。
+app/render.py,47,RenderJob.update,更新当前任务状态并把进度通知上层。
+app/render.py,51,RenderJob.encoder_args,为编码命令附加可读取的进度输出配置。
+app/render.py,57,RenderJob.wait_for_encoder,等待编码器结束并读取封装进度，期间响应取消。
+app/render.py,80,RenderJob.prepare_cache,准备可供正式合成读取的素材缓存并报告处理结果。
+app/render.py,91,RenderJob.create_engine,按用户选择建立 GPU 或 CPU 渲染器，必要时回退。
+app/render.py,102,RenderJob.run,执行当前任务的主流程并把结果或失败交给调用方。
 app/source_video_cache.py,13,video_key,用原文件身份、尺寸和时间精度判定缓存能否原样复用。
 app/source_video_cache.py,24,VideoCache.__init__,每个工作会话最多保留一份正式解码缓存，退出时清理。
 app/source_video_cache.py,30,VideoCache.acquire,首次直接解码，之后借用独立只读租约，不重复分析或解码。
@@ -115,9 +119,9 @@ mac-5.0-redesign/effect_models.py,44,EffectListModel.rowCount,返回当前父节
 mac-5.0-redesign/effect_models.py,48,EffectListModel.data,返回指定列表角色的数据，忽略无效索引。
 mac-5.0-redesign/effect_models.py,52,EffectListModel.update,更新当前任务状态并把进度通知上层。
 mac-5.0-redesign/effect_models.py,65,SelectionListModel.update,以插入、删除和移动事件保持拖拽委托及滚动位置，不重新创建整个队列。
-mac-5.0-redesign/export_pipeline.py,18,StreamingExport.stream_frames,按有限内存批次合成输出帧；小源缓存走常驻 GPU，较大源按空间分块。
-mac-5.0-redesign/export_pipeline.py,106,StreamingExport.frame_data,把连续像素直接交给编码管道，避免完整版逐帧额外复制整幅4K画面。
-mac-5.0-redesign/export_pipeline.py,110,StreamingExport.run,共享一次准备好的素材缓存，逐项流式合成、编码，并写入可核查的耗时记录。
+mac-5.0-redesign/export_pipeline.py,19,StreamingExport.stream_frames,按有限内存批次合成输出帧；小源缓存走常驻 GPU，较大源按空间分块。
+mac-5.0-redesign/export_pipeline.py,107,StreamingExport.frame_data,把连续像素直接交给编码管道，避免完整版逐帧额外复制整幅4K画面。
+mac-5.0-redesign/export_pipeline.py,111,StreamingExport.run,共享一次准备好的素材缓存，逐项流式合成、编码，并写入可核查的耗时记录。
 mac-5.0-redesign/i18n.py,53,translate_text,翻译动态状态文本并缓存重复的查找结果。
 mac-5.0-redesign/i18n.py,69,Translator.__init__,建立对象所需的状态、资源句柄和默认配置。
 mac-5.0-redesign/i18n.py,74,Translator.isEmpty,告知 Qt 翻译器是否应参与当前语言查找。
@@ -313,8 +317,8 @@ tools/build_desktop.py,93,package,把应用、依赖、资源与许可打包成�
 tools/build_full_ffmpeg.py,18,extract,只解开受控源码归档中的普通文件与目录，拒绝路径越界。
 tools/build_full_ffmpeg.py,31,main,构建隔离的dav1d和FFmpeg，旧版视频工具及开发依赖保持可用。
 tools/build_lite.py,30,prepare,显式选择视频切片共享模块，保持轻量版依赖边界。
-tools/build_lite.py,138,package,打包必需 Qt、视频和 GPU 依赖，显式排除重型图像/RAW 处理包。
-tools/build_lite.py,262,main,用同一入口完成开发运行、原生构建和独立打包。
+tools/build_lite.py,139,package,打包必需 Qt、视频和 GPU 依赖，显式排除重型图像/RAW 处理包。
+tools/build_lite.py,263,main,用同一入口完成开发运行、原生构建和独立打包。
 tools/build_lite_ffmpeg.py,17,main,裁剪未用组件并保留可重现配置、源码摘要与第三方许可。
 tools/build_open_shaders.py,12,main,统一调用当前平台入口，防止旧生成脚本还原已经修复的渲染行为。
 tools/check_desktop.py,13,main,默认验证 CPU；显式要求 GPU 时，设备不可用也应报告失败。
@@ -322,18 +326,18 @@ tools/check_freeze_spacing.py,17,cache,为测试建立可重复的合成帧缓�
 tools/check_freeze_spacing.py,27,oracle,用独立参考计算核对算法输出。
 tools/check_freeze_spacing.py,53,crossings,检测条形图中的切缝位置以量化间距误差。
 tools/check_freeze_spacing.py,60,main,组织此入口的初始化、主流程和退出清理。
-tools/check_lite.py,11,main,使用独立设置与缓存执行完整小规模工作流，并保存实际界面预览。
-tools/check_lite.py,45,main.language_changed,触发真实 QML 翻译绑定更新。
-tools/check_lite.py,58,main.wait,处理 Qt 事件直至后台条件满足，失败附带用户可见错误。
+tools/check_lite.py,13,main,使用独立设置与缓存执行完整小规模工作流，并保存实际界面预览。
+tools/check_lite.py,47,main.language_changed,触发真实 QML 翻译绑定更新。
+tools/check_lite.py,60,main.wait,处理 Qt 事件直至后台条件满足，失败附带用户可见错误。
 tools/check_lite_render.py,14,main,逐项核对合成后的真实像素，并释放显存与线程资源。
 tools/check_lite_render.py,73,check_spatial_frames,逐像素核对空间优先路径，覆盖全部效果、映射、取消与临时文件清理。
 tools/check_lite_render.py,142,check_spatial_frames.cancel_on_progress,在首块真正完成后取消，核对生成第一帧之前也能中断并清理。
 tools/check_lite_render.py,232,check_tile_cleanup,用真实GPU分配验证预上传/渲染中取消，以及显存不足与设备错误的资源回收。
 tools/check_lite_render.py,244,check_tile_cleanup.tracked,只拦截第二次分配的故障，先前分配仍由真实GPU创建与释放。
 tools/check_lite_render.py,256,check_tile_cleanup.tracked.recorded_destroy,记录真实释放调用，检测重复释放及泄漏。
-tools/check_ui.py,11,main,使用独立设置、合成视频和临时输出，不改用户素材或个人偏好。
-tools/check_ui.py,47,main.retranslate,真实调用语言切换和 QML 重新翻译。
-tools/check_ui.py,60,main.wait,等待后台任务的同时处理界面信号，失败时输出当前状态。
+tools/check_ui.py,13,main,使用独立设置、合成视频和临时输出，不改用户素材或个人偏好。
+tools/check_ui.py,49,main.retranslate,真实调用语言切换和 QML 重新翻译。
+tools/check_ui.py,62,main.wait,等待后台任务的同时处理界面信号，失败时输出当前状态。
 tools/check_utf8_export.py,12,main,不改系统区域设置，用实际导出证明文件格式不再依赖默认代码页。
 tools/check_utf8_export.py,35,main.gbk_default,只替换未明确指定编码的文本打开方式，二进制和显式UTF8保持原行为。
 tools/export_source.py,118,main,组织此入口的初始化、主流程和退出清理。
@@ -354,8 +358,8 @@ tools/prepare_github.py,18,sha256,分块计算附件指纹，避免把大型应�
 tools/prepare_github.py,27,run,执行本地步骤，任何检查失败立即停止后续发布准备。
 tools/prepare_github.py,32,copy_docs,只更新发行包的文档，保留程序执行文件和已验证的运行逻辑。
 tools/prepare_github.py,42,package_mac,复制已验证App后刷新文档、重新本地签名，并保留解压后签名校验。
-tools/prepare_github.py,87,package_windows,整理已实测的Windows代码/运行时，源码单独随Release提供以减小下载。
-tools/prepare_github.py,127,main,导出源码并暂存Git文件，按需生成本地发行候选，始终不提交或推送远程。
+tools/prepare_github.py,92,package_windows,整理已实测的Windows代码/运行时，源码单独随Release提供以减小下载。
+tools/prepare_github.py,141,main,导出源码并暂存Git文件，按需生成本地发行候选，始终不提交或推送远程。
 tools/prepare_lite_ffmpeg.py,15,prepare,验证归档后解包，在项目目录编译pkgconf和x264，不安装到系统。
 tools/profile_lite_4k.py,18,compare,交替先后顺序，用独立进程各测冷/热缓存，避免把历史单次结果当稳定提升。
 tools/profile_lite_4k.py,79,main,强制真实GPU及4K60输出，冷/复用缓存分开记，不降低输出规格。
@@ -365,6 +369,7 @@ tools/prune_lite_bundle.py,27,byte_size,统计真实常规文件，避免把资�
 tools/prune_lite_bundle.py,36,prune,保留Basic、原生与macOS样式，只裁剪可证明未被静态依赖的模块。
 tools/prune_lite_bundle.py,64,prune.dependencies,检查保留库是否直接链接了计划删除的样式框架。
 tools/prune_lite_bundle.py,101,main,仅操作指定轻量包，结果写在项目构建记录中供复核。
+tools/quality_ui.py,4,check_bitrate_controls,真实触发下拉选择与编辑完成信号，拒绝非法值并保持缓存/预览不重算。
 tools/sync_open_source.py,12,sync,同步当前三个平台的声明和独立版本。
 tools/verify_source.py,13,main,组织此入口的初始化、主流程和退出清理。
 tools/windows_acceptance.py,16,hardware,记录操作系统、CPU、显卡与内存，不读取账号、网络配置或设备序列号。

@@ -42,6 +42,7 @@ def prepare(destination=None):
         "controller_state.py",
         "model.py",
         "media.py",
+        "export_quality.py",
         "render.py",
         "windows_bootstrap.py",
         "source_video_cache.py",

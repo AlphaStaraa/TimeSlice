@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from core.engine import CPUEngine
+from export_quality import recommended_bitrate, target_bitrate, validate_bitrate
 from model import (
     BY_ID,
     DEFAULTS,
@@ -128,10 +129,21 @@ class ControllerState(QObject):
         s.update(
             {
                 k: self.global_settings[k]
-                for k in ["fps", "longEdge", "engine", "quality", "keepAudio", "encoder"]
+                for k in [
+                    "fps",
+                    "longEdge",
+                    "engine",
+                    "quality",
+                    "keepAudio",
+                    "encoder",
+                    "bitrateMbps",
+                    "gradientDither",
+                ]
             }
         )
         w, h = dimensions(self.info, s["longEdge"]) if self.info else (1080, 1920)
+        self._state["recommendedBitrateMbps"] = recommended_bitrate(w, h, s["fps"])
+        self._state["exportBitrateMbps"] = target_bitrate(w, h, s["fps"], s["bitrateMbps"]) / 1e6
         n, pix, cap = density(e, s, w, h)
         group = effect_group(e)
         variant = group_variant(group, self.active)
@@ -281,6 +293,11 @@ class ControllerState(QObject):
     def setSetting(self, key, value):
         if key not in DEFAULTS and key != "mapPath":
             return
+        if key == "bitrateMbps":
+            try:
+                value = validate_bitrate(value)
+            except (ValueError, TypeError):
+                return
         if key in (
             "sliceCount",
             "sliceMode",
@@ -308,10 +325,22 @@ class ControllerState(QObject):
                 value = min(float(value), s["sourceEnd"] - 0.001)
             else:
                 value = max(float(value), s["sourceStart"] + 0.001)
-        if key in ["fps", "longEdge", "engine", "quality", "keepAudio", "encoder"]:
+        if key in [
+            "fps",
+            "longEdge",
+            "engine",
+            "quality",
+            "keepAudio",
+            "encoder",
+            "bitrateMbps",
+            "gradientDither",
+        ]:
             self.global_settings[key] = value
         else:
             self.per_effect[self.active][key] = value
+        if key in ("bitrateMbps", "gradientDither"):
+            self.sync()
+            return
         self.preview_serial += 1
         self.sync()
         self.debounce.start()

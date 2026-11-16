@@ -136,14 +136,17 @@ final class PhoneSheets {
 
     /* 导出先确认画面规格和位置，其余编码细节保留在高级分组。 */
     void export(LinearLayout form){
-        int[] edges={1280,1920,2560,3840,0},rates={24,30,50,60,120},samples={24,48,96,0},bits={0,8000000,16000000,35000000,60000000,100000000};
+        int[] edges={1280,1920,2560,3840,0},rates={24,30,50,60,120},samples={24,48,96,0};
         int count=a.selected.size();TextView summary=a.text(exportSummary(),12,a.MUTED);a.add(form,summary,28);
         addProgress(form);
         a.choice(form,a.t("分辨率","Resolution"),new String[]{"720p","1080p","1440p","4K",a.t("原始尺寸","Original")},a.index(edges,a.edge),index->{a.edge=edges[index];summary.setText(exportSummary());a.preparedKey="";a.prepareSource();});
-        a.choice(form,a.t("帧率","Frame rate"),new String[]{"24 fps","30 fps","50 fps","60 fps","120 fps"},a.index(rates,a.fps),index->a.fps=rates[index]);
-        LinearLayout output=new LinearLayout(a);output.setGravity(Gravity.CENTER_VERTICAL);location=a.text("",12,a.MUTED);location.setSingleLine(true);location.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE);output.addView(location,new LinearLayout.LayoutParams(0,a.dp(52),1));Button change=StudioUi.button(a,a.t("更换","Change"),false,()->a.startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION),12));change.setTextSize(12);output.addView(change,new LinearLayout.LayoutParams(a.dp(64),a.dp(40)));form.addView(output);refreshLocation();
+        a.choice(form,a.t("帧率","Frame rate"),new String[]{"24 fps","30 fps","50 fps","60 fps","120 fps"},a.index(rates,a.fps),index->{a.fps=rates[index];summary.setText(exportSummary());});
+        a.choice(form,a.t("码率","Bitrate"),new String[]{a.t("推荐","Recommended"),a.t("自定义","Custom")},a.bitrate>0?1:0,index->{int next=index==0?0:outputBitrate();if(next!=a.bitrate){a.bitrate=next;show(3);}});
+        if(a.bitrate>0)a.number(form,a.t("目标码率（Mbps）","Target bitrate (Mbps)"),a.bitrate/1000000f,1,500,false,value->{a.bitrate=Math.round(value*1000000f);summary.setText(exportSummary());});
+        TextView bitrateHint=a.text(a.t("码率越高，文件越大。实际码率随画面变化。","Higher bitrate increases file size. Actual bitrate varies with the image."),11,a.MUTED);bitrateHint.setPadding(0,a.dp(6),0,a.dp(10));form.addView(bitrateHint);
+        LinearLayout output=new LinearLayout(a);output.setGravity(Gravity.CENTER_VERTICAL);location=a.text("",12,a.MUTED);location.setSingleLine(true);location.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE);output.addView(location,new LinearLayout.LayoutParams(0,a.dp(52),1));Button change=StudioUi.button(a,a.t("更换","Change"),false,()->a.startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION),12));change.setTextSize(12);output.addView(change,new LinearLayout.LayoutParams(a.dp(a.english?84:64),a.dp(40)));form.addView(output);refreshLocation();
         fold(form,"export.advanced",a.t("高级","Advanced"),box->{
-            a.choice(box,a.t("目标码率","Bitrate"),new String[]{a.t("自动","Auto"),"8 Mbps","16 Mbps","35 Mbps","60 Mbps","100 Mbps"},a.index(bits,a.bitrate),index->a.bitrate=bits[index]);
+            a.toggle(box,a.t("平滑渐变","Smooth gradients"),a.gradientDither,on->a.gradientDither=on);
             a.choice(box,a.t("时间细节","Time detail"),new String[]{"24","48","96",a.t("原始精度","Full precision")},a.index(samples,a.samples),index->{a.samples=samples[index];a.preparedKey="";a.prepareSource();});
             a.choice(box,a.t("计算方式","Compute"),new String[]{a.t("自动","Auto"),"GPU","CPU"},Arrays.asList("auto","gpu","cpu").indexOf(a.mode),index->{a.mode=new String[]{"auto","gpu","cpu"}[index];a.worker.execute(()->{try{if(a.renderer!=null)a.renderer.close();a.renderer=new Renderer(a,a.mode);a.post(()->{a.version++;a.requestPreview();});}catch(Exception error){a.fail(error);}});});
             a.toggle(box,a.t("保留原声","Keep audio"),a.keepSound,on->a.keepSound=on);
@@ -153,7 +156,10 @@ final class PhoneSheets {
     }
 
     /* 注明实际尺寸和导出对象，原片小于目标规格时不冒充已放大。 */
-    String exportSummary(){String subject=a.selected.size()==1?a.name(a.effectById(a.selected.iterator().next())):a.selected.size()+a.t(" 项"," items");if(a.source==null)return subject;int[] size=a.source.size(a.edge);return subject+" · "+size[0]+" × "+size[1];}
+    String exportSummary(){String subject=a.selected.size()==1?a.name(a.effectById(a.selected.iterator().next())):a.selected.size()+a.t(" 项"," items");if(a.source==null)return subject;int[] size=a.source.size(a.edge);return subject+" · "+size[0]+" × "+size[1]+" · "+a.fps+" fps · "+a.formatValue(outputBitrate()/1000000f)+" Mbps";}
+
+    /* 按实际输出尺寸计算推荐值，使手机界面、负载估计与编码器保持一致。 */
+    int outputBitrate(){int[] size=a.source==null?new int[]{1280,720}:a.source.size(a.edge);return ExportQuality.resolve(size[0],size[1],a.fps,a.bitrate);}
 
     /* 系统目录选择结束后立即更新保存位置，避免显示旧值。 */
     void refreshLocation(){if(location!=null)location.setText(a.outputTree==null?a.t("保存至  相册 / 时刃","Save to  Gallery / TimeSlice"):a.t("保存至  自选文件夹","Save to  Chosen folder"));}

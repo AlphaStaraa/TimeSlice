@@ -37,7 +37,7 @@ public final class Effect {
         public float seconds=0, build=.5f, angle=45, cycles=0, turns=-1, span=0, density=.42f, softness=.15f;
         public float shadowStrength=.25f, shadowWidth=.50f, shadowSoftness=1f;
         public float rotationStartAngle=0, discardRatio=.60f,sourceStart=0,sourceEnd=1,centerX=.5f,centerY=.5f;
-        public boolean reverse=false, dayNightSplit=false, smooth=false;
+        public boolean reverse=false, dayNightSplit=false, smooth=false, exportDither=false;
         public TimeMap timeMap=null;
         public int mapMode=0,waveSources=2;
         /* 复制当前设置以隔离后台任务与界面编辑。 */ public Settings copy(){
@@ -81,7 +81,7 @@ public final class Effect {
         float[] f={u,split?Math.max(0,Math.min(1,u))*build:u,frames-1,(float)ow/oh,n,pix?1:0,s.span>0?s.span:span,
             s.cycles>0?s.cycles:cycles,c[0]+s.centerX-.5f,c[1]+s.centerY-.5f,shape==2||shape==12?s.angle:shape==4?s.rotationStartAngle:0,
             s.turns<0?turns:s.turns,build,s.softness,s.density,s.reverse?1:0,s.sourceStart,s.sourceEnd,ow,oh};
-        int flags=(s.smooth?1:0)|(split?1024:0)|(s.mapMode==1?2:0);
+        int flags=(s.smooth?1:0)|(split?1024:0)|(s.mapMode==1?2:0)|(s.exportDither?4096:0);
         if(s.timeMap!=null)flags|=s.timeMap.bits==8?4:s.timeMap.bits==16?8:0;
         int[] v={family,shape,id,ending(s),s.direction,s.playback,o,view,frames,s.timeMap!=null&&family!=3?1:0,s.waveSources,flags};
         float strength=view==0&&shadowEnabled(s)?s.shadowStrength:0;

@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 from core.engine import CPUEngine, GPUEngine
+from export_quality import bitrate_report
 from media import FrameCache, check, choose_encoder, encode_args, popen, stop_process, time_map
 from model import MAC42, density, duration
 
@@ -115,6 +116,7 @@ class RenderJob:
             engine = self.create_engine(first)
             encoder = choose_encoder(first["encoder"])
             for i, (effect, s) in enumerate(self.jobs):
+                s = dict(s, _exportDither=bool(s.get("gradientDither", True)))
                 check(self.cancel)
                 start = time.monotonic()
                 total = round(duration(effect, s) * s["fps"])
@@ -184,6 +186,7 @@ class RenderJob:
                                 self.info,
                                 s["keepAudio"],
                                 raw,
+                                bitrate_mbps=s.get("bitrateMbps", 0),
                             )
                             process = popen(
                                 self.encoder_args(args, progress_file),
@@ -209,6 +212,7 @@ class RenderJob:
                                 encoder,
                                 self.info,
                                 s["keepAudio"],
+                                bitrate_mbps=s.get("bitrateMbps", 0),
                             )
                             process = popen(
                                 self.encoder_args(args, progress_file),
@@ -248,6 +252,9 @@ class RenderJob:
                         output=str(final),
                         engine=used,
                         encoder=encoder,
+                        encoding=bitrate_report(
+                            cache.width, cache.height, s["fps"], s.get("bitrateMbps", 0)
+                        ),
                         frames=total,
                         seconds=elapsed,
                         sourceCache=cache.meta,

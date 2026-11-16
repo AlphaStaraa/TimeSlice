@@ -57,5 +57,9 @@
   "导出本地统计…": "Export local metrics…",
   "切片参数已导入": "Slice preset imported",
   "切片参数已保存": "Slice preset saved",
-  "本地统计已导出": "Local metrics exported"
+  "本地统计已导出": "Local metrics exported",
+  "码率": "Bitrate",
+  "目标码率": "Target bitrate",
+  "码率越高，文件越大。实际码率随画面变化。": "Higher bitrate increases file size. Actual bitrate varies with the image.",
+  "平滑渐变": "Smooth gradients"
 }

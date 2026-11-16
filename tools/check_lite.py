@@ -7,6 +7,8 @@ import sys
 import time
 from pathlib import Path
 
+from quality_ui import check_bitrate_controls
+
 
 def main():
     """使用独立设置与缓存执行完整小规模工作流，并保存实际界面预览。"""
@@ -134,6 +136,8 @@ def main():
         output = work / "exports"
         output.mkdir(exist_ok=True)
         studio.setOutput(str(output))
+        check_bitrate_controls(window, studio, qt, app, 1)
+        studio.setActive(2)
         reused = []
         for _ in range(2):
             studio.startRender()
@@ -142,6 +146,8 @@ def main():
             folder = Path(studio.state["result"])
             report = json.loads((folder / "渲染记录.json").read_text())[0]
             reused.append(report["cacheReused"])
+            assert report["encoding"]["targetMbps"] == 73.5
+            assert report["settings"]["_exportDither"]
             movie = next(folder.glob("*.mp4"))
             media.run([media.ffmpeg(), "-v", "error", "-i", str(movie), "-f", "null", "-"])
         assert reused == [False, True], reused

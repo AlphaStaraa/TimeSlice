@@ -37,6 +37,7 @@ public final class MainActivity extends Activity {
     Button export,play;SeekBar timeline;ProgressBar prepareBar,exportBar;
     LinearLayout cards,queue,queueCards;
     HorizontalScrollView libraryScroll,queueScroll;
+    boolean gradientDither=true;
     int family=0,edge=1280,samples=48,fps=30,bitrate=0,version=0,view=0,prepareGeneration=0,gradeEndpoint=0,hslBand=0,pendingMapId=100;
     boolean previewOnce=false,batchMode=false,busy=false,preparing=false,playing=false,keepSound=true,english=false,freezeSplit=false,exportAfterPreparation=false;
     float u=0,freezeDiscard=.6f;long lastTick;Uri lastOutput,outputTree;
@@ -266,19 +267,19 @@ public final class MainActivity extends Activity {
         if(busy){cancel.set(true);message(t("正在安全取消…","Cancelling safely…"));return;}if(source==null){message(t("请先导入素材","Import media first"));return;}if(selected.isEmpty())return;
         if(preparing||preparedCache==null||!preparedKey.equals(sourceKey()+"/"+sourceOptions.processingKey())){exportAfterPreparation=true;updateButton();if(!preparing)prepareSource();return;}
         int[] size=source.size(edge);int count=samples<=0?(int)Math.ceil(source.durationUs/1e6*source.fps):samples;float seconds=0;for(int id:selected)seconds+=effectById(id).seconds(settings.get(id));ExportSafety.Assessment risk=ExportSafety.inspect(size[0],size[1],fps,bitrate,count,seconds);
-        if(risk.highLoad){String description=size[0]+" × "+size[1]+" · "+fps+" fps · "+(bitrate>0?bitrate/1000000+" Mbps":t("自动码率","Auto bitrate"))+"\n\n"+t("这组参数会增加耗时、耗电和发热。请保持设备通风，并预留足够空间。","These settings increase rendering time, power use and heat. Keep the device ventilated and leave enough free space.")+"\n\n"+(risk.hardwareSupported?t("已找到支持所选参数的硬件编码器。","A hardware encoder supports these settings."):t("未确认硬件编码支持，可能需要兼容编码或调整参数。","Hardware encoding support is unconfirmed. Compatibility encoding or different settings may be needed."));riskDialog=StudioUi.alertBuilder(this).setTitle(t("高负载导出","High-load export")).setMessage(description).setPositiveButton(t("继续导出","Export anyway"),(d,w)->beginExport()).setNegativeButton(t("调整","Adjust"),(d,w)->showInspector(3)).setNeutralButton("1080p / 30fps",(d,w)->{edge=1920;fps=30;bitrate=0;exportAfterPreparation=true;prepareSource();}).show();}
+        if(risk.highLoad){String description=size[0]+" × "+size[1]+" · "+fps+" fps · "+(formatValue(ExportQuality.resolve(size[0],size[1],fps,bitrate)/1000000f)+" Mbps")+"\n\n"+t("这组参数会增加耗时、耗电和发热。请保持设备通风，并预留足够空间。","These settings increase rendering time, power use and heat. Keep the device ventilated and leave enough free space.")+"\n\n"+(risk.hardwareSupported?t("已找到支持所选参数的硬件编码器。","A hardware encoder supports these settings."):t("未确认硬件编码支持，可能需要兼容编码或调整参数。","Hardware encoding support is unconfirmed. Compatibility encoding or different settings may be needed."));riskDialog=StudioUi.alertBuilder(this).setTitle(t("高负载导出","High-load export")).setMessage(description).setPositiveButton(t("继续导出","Export anyway"),(d,w)->beginExport()).setNegativeButton(t("调整","Adjust"),(d,w)->showInspector(3)).setNeutralButton("1080p / 30fps",(d,w)->{edge=1920;fps=30;bitrate=0;exportAfterPreparation=true;prepareSource();}).show();}
         else beginExport();
     }
 
     /* 借用已经完成的正式缓存，不在导出时再执行稳定去闪。 */
     void beginExport(){
-        if(renderer==null||preparedCache==null)return;playing=false;busy=true;version++;cancel=new AtomicBoolean();AtomicBoolean stop=cancel;final VideoSource.Cache cache=preparedCache;final VideoSource input=source;final int outputFps=fps,outputBits=bitrate;final boolean sound=keepSound;final Uri target=outputTree;
+        if(renderer==null||preparedCache==null)return;playing=false;busy=true;version++;cancel=new AtomicBoolean();AtomicBoolean stop=cancel;final VideoSource.Cache cache=preparedCache;final VideoSource input=source;final int outputFps=fps,outputBits=bitrate;final boolean sound=keepSound,smoothGradient=gradientDither;final Uri target=outputTree;
         List<Effect> jobs=new ArrayList<>();Map<Integer,Effect.Settings> snapshots=new HashMap<>();
         for(int id:selected){jobs.add(effectById(id));snapshots.put(id,settings.get(id).copy());}
         updateButton();queue.removeAllViews();queue.setVisibility(View.GONE);exportBar.setProgress(0);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);TimeEstimate eta=new TimeEstimate();
         worker.execute(()->{try{
             int all=0;for(Effect effect:jobs)all+=Math.max(1,Math.round(effect.seconds(snapshots.get(effect.id))*outputFps));int completed=0,index=0;
-            for(Effect effect:jobs){VideoSource.check(stop);Effect.Settings s=snapshots.get(effect.id);int total=Math.max(1,Math.round(effect.seconds(s)*outputFps));File movie=new File(getCacheDir(),"render_"+UUID.randomUUID()+".mp4");
+            for(Effect effect:jobs){VideoSource.check(stop);Effect.Settings s=snapshots.get(effect.id);s.exportDither=smoothGradient;int total=Math.max(1,Math.round(effect.seconds(s)*outputFps));File movie=new File(getCacheDir(),"render_"+UUID.randomUUID()+".mp4");
                 try{ByteBuffer first=null;Uri audio=input.uri;boolean withAudio=sound;
                     try(VideoEncoder encoder=new VideoEncoder(this,audio,movie,cache.w,cache.h,outputFps,withAudio,stop,outputBits)){
                         for(int frame=0;frame<total;frame++){

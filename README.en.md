@@ -25,10 +25,10 @@ The current release candidates are **test builds**. Once published, choose an ar
 
 | Platform | Version | Requirements |
 | --- | --- | --- |
-| macOS full | 1.0.4 | Apple Silicon, macOS14+ |
-| macOS Lite | 1.0.4-lite.1 | Apple Silicon, macOS14+ |
-| Windows | 1.0.4-video-preview.1 | Windows10 22H2 / 11, x64 |
-| Android | 1.0.3-android-preview.3 | Android10+; export capabilities depend on the device |
+| macOS full | 1.0.5 | Apple Silicon, macOS14+ |
+| macOS Lite | 1.0.5-lite.1 | Apple Silicon, macOS14+ |
+| Windows | 1.0.5-quality-preview.1 | Windows10 22H2 / 11, x64 |
+| Android | 1.0.4-quality-preview.1 | Android10+; export capabilities depend on the device |
 
 Extract the full archive before launching. Import a video, select an effect and choose an output folder before your first export. Android supports the gallery or a chosen folder.
 
@@ -50,6 +50,10 @@ python tools/golden.py
 With Make, run `make check test PYTHON=python`. For actual GPU comparisons, run `python tools/check_desktop.py --gpu` on supported hardware. Linux is used for CPU verification only and is not a supported application distribution.
 
 See the [build guide](docs/开发指南.md) for Lite, Android, compact FFmpeg/OpenCV builds and benchmarks. The GitHub workflows run after upload; local validation is not a GitHub Actions result.
+
+## Export quality
+
+Bitrate follows the actual output resolution and frame rate, or accepts a custom target from 1 to 500 Mbps. Smooth gradients is enabled for export by default. Output remains 8-bit SDR H.264; it cannot restore color levels already missing in the source.
 
 ## Repository layout
 

@@ -1175,6 +1175,23 @@ ApplicationWindow {
          Choice {model: ["24 fps", "25 fps", "30 fps", "50 fps", "60 fps"]; currentIndex: [24,25,30,50,60].indexOf(root.st.settings.fps); onActivated: studio.setSetting("fps", [24,25,30,50,60][currentIndex])}
         }
         InspectorRow {
+         caption: qsTr("码率")
+         Choice {objectName:"exportBitrateMode";model:[qsTr("推荐"),qsTr("自定义")];currentIndex:root.st.settings.bitrateMbps>0?1:0;onActivated:studio.setSetting("bitrateMbps",currentIndex===0?0:root.st.recommendedBitrateMbps)}
+        }
+        InspectorRow {
+         visible:root.st.settings.bitrateMbps>0
+         caption:"Mbps"
+         NumberInput {
+          objectName:"exportBitrateInput"
+          text:String(root.st.settings.bitrateMbps)
+          validator:DoubleValidator {bottom:1;top:500;decimals:1;locale:"C"}
+          inputMethodHints:Qt.ImhFormattedNumbersOnly
+          onEditingFinished:{let n=Number(text);if(isFinite(n)&&n>=1&&n<=500)studio.setSetting("bitrateMbps",n);text=Qt.binding(function(){return String(root.st.settings.bitrateMbps)})}
+         }
+        }
+        MutedText {objectName:"exportBitrateSummary";text:qsTr("目标码率")+" · "+root.st.exportBitrateMbps+" Mbps";Layout.fillWidth:true;wrapMode:Text.WordWrap}
+        MutedText {text:qsTr("码率越高，文件越大。实际码率随画面变化。");Layout.fillWidth:true;wrapMode:Text.WordWrap}
+        InspectorRow {
          caption: qsTr("渲染")
          Choice {model: [qsTr("自动"), "Metal GPU", qsTr("多核 CPU")]; currentIndex: ["auto","gpu","cpu"].indexOf(root.st.settings.engine); onActivated: studio.setSetting("engine", ["auto","gpu","cpu"][currentIndex])}
         }
@@ -1191,6 +1208,10 @@ ApplicationWindow {
         ColumnLayout {
          visible: root.exportAdvanced
          Layout.fillWidth: true; spacing: 10
+         InspectorRow {
+          caption:qsTr("平滑渐变")
+          Toggle {checked:root.st.settings.gradientDither;onToggled:studio.setSetting("gradientDither",checked)}
+         }
          InspectorRow {
           caption: qsTr("采样"); hint: qsTr("精细按素材帧率取样，标准最高 30 fps")
           Choice {model: [qsTr("原片精度"), qsTr("标准 · 30 fps")]; currentIndex: root.st.settings.quality === "full" ? 0 : 1; onActivated: studio.setSetting("quality", currentIndex === 0 ? "full" : "standard")}

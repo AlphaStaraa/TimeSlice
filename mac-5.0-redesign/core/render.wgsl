@@ -2822,40 +2822,47 @@ fn fieldColor53_0( f_12 : Field_0,  local_4 : u32,  p_29 : TFParams_0) -> vec4<f
     return color_1;
 }
 
+fn gradientOffset105_0( x_8 : u32,  y_3 : u32) -> f32
+{
+    var _S206 : u32 = (y_3 >> (u32(1)));
+    var _S207 : u32 = (y_3 >> (u32(2)));
+    return (f32((((((((((((((((x_8 ^ (y_3))) & (u32(1)))) << (u32(5)))) | (((((y_3 & (u32(1)))) << (u32(4))))))) | (((((((((x_8 >> (u32(1)))) ^ (_S206))) & (u32(1)))) << (u32(3))))))) | (((((_S206 & (u32(1)))) << (u32(2))))))) | (((((((((x_8 >> (u32(2)))) ^ (_S207))) & (u32(1)))) << (u32(1))))))) | (((_S207 & (u32(1))))))) + 0.5f) / 64.0f - 0.5f;
+}
+
 fn pack_0( c_14 : vec4<f32>) -> u32
 {
-    var _S206 : vec4<u32> = vec4<u32>(round(clamp(c_14, vec4<f32>(0.0f), vec4<f32>(1.0f)) * vec4<f32>(255.0f)));
-    return ((((((_S206.x) | ((((_S206.y) << (u32(8))))))) | ((((_S206.z) << (u32(16))))))) | (u32(4278190080)));
+    var _S208 : vec4<u32> = vec4<u32>(round(clamp(c_14, vec4<f32>(0.0f), vec4<f32>(1.0f)) * vec4<f32>(255.0f)));
+    return ((((((_S208.x) | ((((_S208.y) << (u32(8))))))) | ((((_S208.z) << (u32(16))))))) | (u32(4278190080)));
 }
 
 @compute
 @workgroup_size(8, 8, 1)
 fn render(@builtin(global_invocation_id) id_0 : vec3<u32>)
 {
-    var _S207 : u32 = id_0.x;
-    var _S208 : bool;
-    if((_S207 >= cfg_0[i32(2)]))
+    var _S209 : u32 = id_0.x;
+    var _S210 : bool;
+    if((_S209 >= cfg_0[i32(2)]))
     {
-        _S208 = true;
+        _S210 = true;
     }
     else
     {
-        _S208 = ((id_0.y) >= cfg_0[i32(3)]);
+        _S210 = ((id_0.y) >= cfg_0[i32(3)]);
     }
-    if(_S208)
+    if(_S210)
     {
-        _S208 = true;
+        _S210 = true;
     }
     else
     {
-        _S208 = ((id_0.z) >= cfg_0[i32(8)]);
+        _S210 = ((id_0.z) >= cfg_0[i32(8)]);
     }
-    if(_S208)
+    if(_S210)
     {
         return;
     }
-    var _S209 : u32 = id_0.y;
-    var local_5 : u32 = _S209 * cfg_0[i32(2)] + _S207;
+    var _S211 : u32 = id_0.y;
+    var local_5 : u32 = _S211 * cfg_0[i32(2)] + _S209;
     var uv_16 : vec2<f32> = (vec2<f32>(id_0.xy + vec2<u32>(cfg_0[i32(0)], cfg_0[i32(1)])) + vec2<f32>(0.5f)) / vec2<f32>(f32(cfg_0[i32(4)]), f32(cfg_0[i32(5)]));
     var p_30 : TFParams_0;
     p_30.outTime_0 = param_0.outTime_0;
@@ -2898,17 +2905,17 @@ fn render(@builtin(global_invocation_id) id_0 : vec3<u32>)
     p_30.sampleH_0 = param_0.sampleH_0;
     p_30.reserved0_0 = param_0.reserved0_0;
     p_30.reserved1_0 = param_0.reserved1_0;
-    var _S210 : u32 = id_0.z;
-    var _S211 : f32 = f32(cfg_0[i32(7)] + _S210) / f32(max(u32(1), cfg_0[i32(9)]));
-    p_30.u_0 = _S211;
-    p_30.outTime_0 = _S211;
+    var _S212 : u32 = id_0.z;
+    var _S213 : f32 = f32(cfg_0[i32(7)] + _S212) / f32(max(u32(1), cfg_0[i32(9)]));
+    p_30.u_0 = _S213;
+    p_30.outTime_0 = _S213;
     if((((p_30.flags_0) & (u32(1024)))) != u32(0))
     {
         var build_2 : f32 = clamp(p_30.build_0, 0.10000000149011612f, 0.89999997615814209f);
         p_30.u_0 = clamp(p_30.u_0 * build_2, 0.0f, build_2);
     }
-    var map_0 : f32;
     var color_2 : vec4<f32>;
+    var map_0 : f32;
     if((p_30.viewMode_0) == u32(1))
     {
         if((((p_30.flags_0) & (u32(1024)))) != u32(0))
@@ -2919,15 +2926,15 @@ fn render(@builtin(global_invocation_id) id_0 : vec3<u32>)
         {
             map_0 = p_30.u_0;
         }
-        var _S212 : vec4<f32> = sampleSource_0(map_0, local_5, p_30);
-        color_2 = _S212;
+        var _S214 : vec4<f32> = sampleSource_0(map_0, local_5, p_30);
+        color_2 = _S214;
     }
     else
     {
         if(filteredFreeze52_0(p_30))
         {
-            var _S213 : vec4<f32> = filteredStripeColor52_0(uv_16, local_5, p_30);
-            color_2 = _S213;
+            var _S215 : vec4<f32> = filteredStripeColor52_0(uv_16, local_5, p_30);
+            color_2 = _S215;
         }
         else
         {
@@ -2939,14 +2946,13 @@ fn render(@builtin(global_invocation_id) id_0 : vec3<u32>)
             {
                 map_0 = 0.0f;
             }
-            var _S214 : bool = needsAA53_0(uv_16, p_30, map_0);
-            if(_S214)
+            var _S216 : bool = needsAA53_0(uv_16, p_30, map_0);
+            if(_S216)
             {
                 var q_10 : TFParams_0 = p_30;
                 q_10.reserved0_0 = 0.25f;
-                var _S215 : vec4<f32> = vec4<f32>(vec4<i32>(i32(0)));
+                color_2 = vec4<f32>(vec4<i32>(i32(0)));
                 var yy_0 : i32 = i32(0);
-                color_2 = _S215;
                 loop
                 {
                     if((yy_0 < i32(4)))
@@ -2966,24 +2972,30 @@ fn render(@builtin(global_invocation_id) id_0 : vec3<u32>)
                         {
                             break;
                         }
-                        var _S216 : Field_0 = evaluate3_0(uv_16 + vec2<f32>((f32(xx_0) + 0.5f) / 4.0f - 0.5f, (f32(yy_0) + 0.5f) / 4.0f - 0.5f) / vec2<f32>(p_30.sampleW_0, p_30.sampleH_0), q_10, map_0);
-                        var _S217 : vec4<f32> = fieldColor53_0(_S216, local_5, p_30);
-                        var color_3 : vec4<f32> = color_2 + _S217 / vec4<f32>(16.0f);
+                        var _S217 : Field_0 = evaluate3_0(uv_16 + vec2<f32>((f32(xx_0) + 0.5f) / 4.0f - 0.5f, (f32(yy_0) + 0.5f) / 4.0f - 0.5f) / vec2<f32>(p_30.sampleW_0, p_30.sampleH_0), q_10, map_0);
+                        var _S218 : vec4<f32> = fieldColor53_0(_S217, local_5, p_30);
+                        color_2 = color_2 + _S218 / vec4<f32>(16.0f);
                         xx_0 = xx_0 + i32(1);
-                        color_2 = color_3;
                     }
                     yy_0 = yy_0 + i32(1);
                 }
             }
             else
             {
-                var _S218 : Field_0 = evaluate3_0(uv_16, p_30, map_0);
-                var _S219 : vec4<f32> = fieldColor53_0(_S218, local_5, p_30);
-                color_2 = _S219;
+                var _S219 : Field_0 = evaluate3_0(uv_16, p_30, map_0);
+                var _S220 : vec4<f32> = fieldColor53_0(_S219, local_5, p_30);
+                color_2 = _S220;
             }
         }
     }
-    output_0[(_S210 * cfg_0[i32(3)] + _S209) * cfg_0[i32(2)] + _S207] = pack_0(color_2);
+    if((((p_30.flags_0) & (u32(4096)))) != u32(0))
+    {
+        var _S221 : vec3<f32> = clamp(color_2.xyz, vec3<f32>(0.0f), vec3<f32>(1.0f)) + vec3<f32>((gradientOffset105_0(_S209 + cfg_0[i32(0)], _S211 + cfg_0[i32(1)]) / 255.0f));
+        color_2.x = _S221.x;
+        color_2.y = _S221.y;
+        color_2.z = _S221.z;
+    }
+    output_0[(_S212 * cfg_0[i32(3)] + _S211) * cfg_0[i32(2)] + _S209] = pack_0(color_2);
     return;
 }
 

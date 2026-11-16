@@ -8,6 +8,7 @@ import time
 import uuid
 
 import numpy as np
+from export_quality import bitrate_report
 from media import check, choose_encoder, encode_args, popen, stop_process, time_map
 from model import density, duration
 from render import gpu_tile
@@ -137,7 +138,7 @@ class StreamingExport:
                 progress = workspace / f"encode_{index}.progress"
                 process = None
                 mapping = None
-                settings = dict(settings)
+                settings = dict(settings, _exportDither=bool(settings.get("gradientDither", True)))
                 if settings.get("customMap") and settings.get("mapPath"):
                     mapping, bits = time_map(
                         settings["mapPath"], cache.width, cache.height, settings["mapMode"] == 1
@@ -154,6 +155,7 @@ class StreamingExport:
                         encoder,
                         self.info,
                         settings["keepAudio"],
+                        bitrate_mbps=settings.get("bitrateMbps", 0),
                     )
                     with log.open("wb") as error:
                         process = popen(
@@ -182,6 +184,12 @@ class StreamingExport:
                             output=str(final),
                             engine=engine.label,
                             encoder=encoder,
+                            encoding=bitrate_report(
+                                cache.width,
+                                cache.height,
+                                settings["fps"],
+                                settings.get("bitrateMbps", 0),
+                            ),
                             frames=total,
                             seconds=time.monotonic() - start,
                             sourceCache=cache.meta,

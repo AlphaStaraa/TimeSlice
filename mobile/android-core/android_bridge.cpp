@@ -41,9 +41,9 @@ extern "C" JNIEXPORT void JNICALL Java_studio_shiren_mobile_NativeCore_composeGr
    color=fieldColor53(f,q,src,w,h,uv,grade);
   }
   auto pixel=out+(y*w+x)*4;
-  pixel[0]=uint8_t(round(clamp(color.r*255,0.f,255.f)));
-  pixel[1]=uint8_t(round(clamp(color.g*255,0.f,255.f)));
-  pixel[2]=uint8_t(round(clamp(color.b*255,0.f,255.f)));pixel[3]=255;
+  pixel[0]=uint8_t(quantizeColor105(color.r,x,y,p->flags));
+  pixel[1]=uint8_t(quantizeColor105(color.g,x,y,p->flags));
+  pixel[2]=uint8_t(quantizeColor105(color.b,x,y,p->flags));pixel[3]=255;
  }
 }
 

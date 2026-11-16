@@ -467,5 +467,9 @@
   "直接进入切片合成": "Compositing slices",
   "准备切片素材": "Preparing source frames",
   "延时 · 切片": "Timelapse · Time slices",
-  "拖入一段延时视频": "Drop a timelapse video"
+  "拖入一段延时视频": "Drop a timelapse video",
+  "码率": "Bitrate",
+  "目标码率": "Target bitrate",
+  "码率越高，文件越大。实际码率随画面变化。": "Higher bitrate increases file size. Actual bitrate varies with the image.",
+  "平滑渐变": "Smooth gradients"
 }

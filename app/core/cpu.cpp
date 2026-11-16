@@ -1,5 +1,6 @@
 #include "cpu_math.h"
 #include "field_common.h"
+#include "quantization.h"
 #ifdef _WIN32
 #define API extern "C" __declspec(dllexport)
 #else
@@ -117,7 +118,7 @@ bool needsAA53(float2 uv,TFParams p,float mapValue);
  TFParams p=*params;
  for(int y=y0;y<y0+rows;y++)for(int x=0;x<w;x++){
   Color53 c=pixel53(p,float2((x+.5f)/w,(y+.5f)/h),source,sw,sh,map?map[y*w+x]:0,grade);
-  uint8_t* d=out+((y-y0)*w+x)*4;d[0]=uint8_t(round(clamp(c.r,0.f,1.f)*255));d[1]=uint8_t(round(clamp(c.g,0.f,1.f)*255));d[2]=uint8_t(round(clamp(c.b,0.f,1.f)*255));d[3]=255;
+  uint8_t* d=out+((y-y0)*w+x)*4;d[0]=uint8_t(quantizeColor105(c.r,x,y,p.flags));d[1]=uint8_t(quantizeColor105(c.g,x,y,p.flags));d[2]=uint8_t(quantizeColor105(c.b,x,y,p.flags));d[3]=255;
  }
 }
 #endif

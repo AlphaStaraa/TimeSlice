@@ -55,6 +55,10 @@ def package_mac(profile, assets, work, version):
     app = stage / name
     shutil.copytree(source, app, symlinks=True)
     copy_docs(app / "Contents/Resources")
+    readme = ROOT / ("lite/README.md" if lite else "mac-5.0-redesign/README_MAC.md")
+    (app / "Contents/Resources/README.md").write_text(
+        readme.read_text(encoding="utf-8").replace("../docs/", "docs/"), encoding="utf-8"
+    )
     original = source / "Contents/MacOS" / ("时刃 Lite" if lite else "时刃")
     copied = app / "Contents/MacOS" / original.name
     assert sha256(original) == sha256(copied)
@@ -65,7 +69,7 @@ def package_mac(profile, assets, work, version):
         "Extract the archive and open the application. Apple Silicon / macOS14+.\n"
         "This test build is locally signed and not notarized by Apple.\n"
         "若系统拦截，尝试打开后前往系统设置→隐私与安全性→仍要打开。\n"
-        "Full corresponding project source: TimeSlice-source-1.0.4.zip in the same Release.\n"
+        f"Full corresponding project source: TimeSlice-source-{version}.zip in the same Release.\n"
         "Keep source access and all notices available when redistributing.\n",
         encoding="utf-8",
     )
@@ -79,15 +83,25 @@ def package_mac(profile, assets, work, version):
         platform="macOS",
         edition=profile,
         file=archive.name,
-        executableSha256=sha256(original),
+        executableSha256=sha256(copied),
+        buildExecutableSha256=sha256(original),
         notarized=False,
     )
 
 
-def package_windows(assets, work, metadata):
+def package_windows(assets, work, metadata, source=None):
     """整理已实测的Windows代码/运行时，源码单独随Release提供以减小下载。"""
     version = metadata["version"]
-    source = ROOT / f"dist/Windows_视频切片_1.0.4/Windows-{version}-x64"
+    if source is None:
+        candidates = [
+            p
+            for p in (ROOT / "dist").rglob(f"Windows-{version}-x64")
+            if (p / "runtime/python.exe").is_file()
+        ]
+        if len(candidates) != 1:
+            raise ValueError("Use --windows-bundle to select one verified Windows directory")
+        source = candidates[0]
+    source = Path(source)
     if not source.is_dir():
         raise FileNotFoundError(f"Build the Windows preview first: {source}")
     stage = work / "TimeSlice-Windows"
@@ -99,7 +113,7 @@ def package_windows(assets, work, metadata):
         "# TimeSlice · Windows preview\n\n"
         "Extract the entire folder, then open 时刃.exe. Windows10 22H2 / 11 x64.\n"
         "完整解压后打开时刃.exe，保留runtime与app文件夹。\n\n"
-        "Source: TimeSlice-source-1.0.4.zip in the same GitHub Release.\n"
+        f"Source: TimeSlice-source-{version.split('-')[0]}.zip in the same GitHub Release.\n"
         "Author AlphaStar · Free · AGPL-3.0-only.\n",
         encoding="utf-8",
     )
@@ -111,7 +125,7 @@ def package_windows(assets, work, metadata):
         if path.is_file()
     }
     (stage / "SHA256.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    archive = assets / "TimeSlice-Windows-1.0.4-preview-x64.zip"
+    archive = assets / f"TimeSlice-Windows-{version.split('-')[0]}-preview-x64.zip"
     archive_tree(stage, archive)
     return dict(
         platform="Windows",
@@ -120,7 +134,7 @@ def package_windows(assets, work, metadata):
         executableSha256=sha256(source / "时刃.exe"),
         nativeDllSha256=sha256(source / "app/native/timefield.dll"),
         qmlSha256=sha256(source / "app/ui/Main.qml"),
-        validation="Independent physical copy; final archive not unpacked on Windows",
+        validation="Cross-built on Mac; this version still needs Windows physical validation",
     )
 
 
@@ -129,6 +143,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--destination", type=Path, required=True)
     parser.add_argument("--with-assets", action="store_true")
+    parser.add_argument("--windows-bundle", type=Path)
     args = parser.parse_args()
     output = args.destination.resolve()
     if output.exists():
@@ -164,10 +179,10 @@ def main():
             windows = json.loads(
                 (ROOT / "mac-5.0-redesign/resources/windows-release.json").read_text()
             )
-            builds.append(package_windows(assets, work, windows))
+            builds.append(package_windows(assets, work, windows, args.windows_bundle))
         android = json.loads((ROOT / "mobile/android-release.json").read_text())
         apk = ROOT / "mobile/dist" / ("时刃_Android_" + android["version"] + ".apk")
-        target = assets / "TimeSlice-Android-1.0.3-preview.apk"
+        target = assets / f"TimeSlice-Android-{android['version'].split('-')[0]}-preview.apk"
         shutil.copy2(apk, target)
         builds.append(dict(platform="Android", file=target.name, apkSha256=sha256(apk)))
     hashes = {p.name: sha256(p) for p in sorted(assets.iterdir()) if p.is_file()}

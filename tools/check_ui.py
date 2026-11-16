@@ -7,6 +7,8 @@ import sys
 import time
 from pathlib import Path
 
+from quality_ui import check_bitrate_controls
+
 
 def main():
     """使用独立设置、合成视频和临时输出，不改用户素材或个人偏好。"""
@@ -128,6 +130,7 @@ def main():
                 )
                 assert export_button.x() + export_button.width() <= window.width()
         window.setWidth(1320)
+        check_bitrate_controls(window, controller, qt, app, 3)
         controller.setLanguage("zh")
         controller.checked = {2}
         controller.setActive(2)
@@ -149,6 +152,9 @@ def main():
         assert not controller.state["error"], controller.state
         videos = sorted(output.rglob("*.mp4"))
         assert videos, controller.state
+        record = json.loads((Path(controller.state["result"]) / "渲染记录.json").read_text())[0]
+        assert record["encoding"]["targetMbps"] == 73.5
+        assert record["settings"]["_exportDither"]
         media.run([media.ffmpeg(), "-v", "error", "-i", str(videos[-1]), "-f", "null", "-"])
         assert not warnings, warnings
         report = dict(
@@ -157,6 +163,7 @@ def main():
             languagePages=8,
             englishExportButton="1/2/46 items at 1320/1120px, no elision",
             shortCpuExport=True,
+            customBitrateMbps=73.5,
             decodedFile=str(videos[-1]),
             qmlWarnings=warnings,
         )

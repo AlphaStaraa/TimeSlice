@@ -15,6 +15,7 @@
 - **黑白时间图**：导入灰度图，控制画面不同位置对应的源视频时刻。
 - **可视化队列**：选择多个效果，拖动排序，分别输出视频。
 - **视频处理**：完整版提供固定机位稳定、三级去闪、首尾调色/HSL；已处理素材缓存可供导出复用。
+- **导出画质**：按实际输出尺寸/帧率推荐码率，也可自定义1–500 Mbps；导出默认开启平滑渐变。
 - **独立Lite版**：专注视频导入、切片与输出，界面和依赖更少。
 
 ![效果示例](docs/media/effects.gif)
@@ -25,10 +26,10 @@
 
 | 平台 | 当前版本 | 要求 |
 | --- | --- | --- |
-| Mac完整版 | 1.0.4 | Apple Silicon、macOS14+ |
-| Mac Lite | 1.0.4-lite.1 | Apple Silicon、macOS14+ |
-| Windows | 1.0.4-video-preview.1 | Windows10 22H2 / 11，x64 |
-| Android | 1.0.3-android-preview.3 | Android10+；导出能力取决于设备 |
+| Mac完整版 | 1.0.5 | Apple Silicon、macOS14+ |
+| Mac Lite | 1.0.5-lite.1 | Apple Silicon、macOS14+ |
+| Windows | 1.0.5-quality-preview.1 | Windows10 22H2 / 11，x64 |
+| Android | 1.0.4-quality-preview.1 | Android10+；导出能力取决于设备 |
 
 完整解压后启动软件，导入视频，选择效果。**首次导出时自行选择保存目录**。Android可保存到相册或自选目录。
 

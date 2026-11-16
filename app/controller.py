@@ -35,7 +35,16 @@ class Controller(PreviewController):
             s.update(
                 {
                     k: self.global_settings[k]
-                    for k in ["fps", "longEdge", "engine", "quality", "keepAudio", "encoder"]
+                    for k in [
+                        "fps",
+                        "longEdge",
+                        "engine",
+                        "quality",
+                        "keepAudio",
+                        "encoder",
+                        "bitrateMbps",
+                        "gradientDither",
+                    ]
                 }
             )
             jobs.append((e, s))

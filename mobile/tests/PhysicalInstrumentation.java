@@ -103,13 +103,15 @@ public final class PhysicalInstrumentation extends Instrumentation {
             Effect.Settings settings = effect.defaults();
             settings.countMode = 1;
             settings.count = 60;
+            settings.exportDither = mode.equals("quality");
+            int requestedBitrate = mode.equals("quality") && index == 2 ? 73500000 : 0;
             File output = new File(dir, "stress-" + index + "-" + edge + "p" + fps + ".mp4");
             int frames = Math.round(seconds * fps);
             long started = SystemClock.elapsedRealtime();
             String encoder;
             try {
                 try (VideoEncoder video = new VideoEncoder(context, source.uri, output,
-                        cache.w, cache.h, fps, false, cancel)) {
+                        cache.w, cache.h, fps, false, cancel, requestedBitrate)) {
                     encoder = video.label;
                     for (int frame = 0; frame < frames; frame++) {
                         ExportSafety.pace(context, cancel);
@@ -127,6 +129,8 @@ public final class PhysicalInstrumentation extends Instrumentation {
                 }
                 JSONObject item = new JSONObject().put("width", cache.w).put("height", cache.h)
                         .put("fps", fps).put("outputFrames", frames).put("sourceSamples", cache.frames)
+                        .put("targetMbps", ExportQuality.resolve(cache.w, cache.h, fps, requestedBitrate)/1000000.)
+                        .put("gradientDither", settings.exportDither)
                         .put("sourcePreparationSeconds", preparation)
                         .put("renderEncodeSeconds", (SystemClock.elapsedRealtime() - started) / 1000.0)
                         .put("engine", renderer.label).put("encoder", encoder)
@@ -180,6 +184,7 @@ public final class PhysicalInstrumentation extends Instrumentation {
         temperatures.put(temperature(origin));
         outputs.put(segment(source, 1920, 30, 1, 0, true, origin));
         outputs.put(segment(source, 3840, 60, 1, 1, true, origin));
+        if(mode.equals("quality")){outputs.put(segment(source,3840,60,.5f,2,true,origin));return;}
         int index = 2;
         while (SystemClock.elapsedRealtime() - origin < 600000) {
             outputs.put(segment(source, 1920, 30, 6, index++, false, origin));
@@ -229,7 +234,7 @@ public final class PhysicalInstrumentation extends Instrumentation {
             if (mode.equals("cleanup")) cleanupEvidence();
             else if (!dir.exists() && !dir.mkdirs()) throw new IOException("Cannot create test directory");
             if (mode.equals("cleanup")) { /* 清理模式不创建新的设备端测试文件。 */ }
-            else if (mode.equals("stress")) stress();
+            else if (mode.equals("stress") || mode.equals("quality")) stress();
             else if (mode.equals("export")) exportEvidence();
             else throw new IllegalArgumentException("Unknown validation mode");
             report.put("passed", true);
