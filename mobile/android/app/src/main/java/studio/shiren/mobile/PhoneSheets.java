@@ -139,6 +139,8 @@ final class PhoneSheets {
         int[] edges={1280,1920,2560,3840,0},rates={24,30,50,60,120},samples={24,48,96,0};
         int count=a.selected.size();TextView summary=a.text(exportSummary(),12,a.MUTED);a.add(form,summary,28);
         addProgress(form);
+        a.choice(form,a.t("格式","Format"),new String[]{"H.264 · 8-bit SDR","HEVC · 10-bit SDR","HDR · PQ 10-bit","HDR · HLG 10-bit"},Arrays.asList(VideoColor.FORMATS).indexOf(a.exportFormat),index->{String format=VideoColor.FORMATS[index];try{if(VideoColor.high(format))VideoColor.requirePrecision();a.exportFormat=format;a.preparedKey="";a.prepareSource();show(3);}catch(Exception error){StudioUi.alertBuilder(a).setTitle(a.t("格式不可用","Format unavailable")).setMessage(error.getMessage()).setPositiveButton(a.t("知道了","OK"),(d,w)->show(3)).show();}});
+        if(a.exportFormat.startsWith("hdr_")||(a.source!=null&&a.source.hdr)){TextView hint=a.text(a.t("HDR预览以SDR映射显示，成片按所选格式输出。","HDR previews use an SDR mapping. Export follows the selected format."),11,a.MUTED);hint.setPadding(0,0,0,a.dp(8));form.addView(hint);}
         a.choice(form,a.t("分辨率","Resolution"),new String[]{"720p","1080p","1440p","4K",a.t("原始尺寸","Original")},a.index(edges,a.edge),index->{a.edge=edges[index];summary.setText(exportSummary());a.preparedKey="";a.prepareSource();});
         a.choice(form,a.t("帧率","Frame rate"),new String[]{"24 fps","30 fps","50 fps","60 fps","120 fps"},a.index(rates,a.fps),index->{a.fps=rates[index];summary.setText(exportSummary());});
         a.choice(form,a.t("码率","Bitrate"),new String[]{a.t("推荐","Recommended"),a.t("自定义","Custom")},a.bitrate>0?1:0,index->{int next=index==0?0:outputBitrate();if(next!=a.bitrate){a.bitrate=next;show(3);}});

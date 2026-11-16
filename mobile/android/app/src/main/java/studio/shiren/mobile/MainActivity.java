@@ -37,6 +37,7 @@ public final class MainActivity extends Activity {
     Button export,play;SeekBar timeline;ProgressBar prepareBar,exportBar;
     LinearLayout cards,queue,queueCards;
     HorizontalScrollView libraryScroll,queueScroll;
+    String exportFormat="h264";
     boolean gradientDither=true;
     int family=0,edge=1280,samples=48,fps=30,bitrate=0,version=0,view=0,prepareGeneration=0,gradeEndpoint=0,hslBand=0,pendingMapId=100;
     boolean previewOnce=false,batchMode=false,busy=false,preparing=false,playing=false,keepSound=true,english=false,freezeSplit=false,exportAfterPreparation=false;
@@ -122,20 +123,20 @@ public final class MainActivity extends Activity {
     /* 预览线程用完旧缓存后再释放，避免替换期间出现悬空指针。 */
     void releaseLater(VideoSource.Cache... caches){Set<VideoSource.Cache> unique=Collections.newSetFromMap(new IdentityHashMap<>());for(VideoSource.Cache cache:caches)if(cache!=null)unique.add(cache);worker.execute(()->{for(VideoSource.Cache cache:unique)cache.close();});}
     /* 正式源缓存身份不包括切片、阴影或实时调色。 */
-    String sourceKey(){return source==null?"":source.uri+"/"+source.width+"x"+source.height+"/"+source.durationUs+"/"+edge+"/"+samples;}
+    String sourceKey(){return source==null?"":source.uri+"/"+source.width+"x"+source.height+"/"+source.durationUs+"/"+edge+"/"+samples+"/"+VideoColor.precision(source,exportFormat);}
 
     /* 素材选项改变就准备输出尺寸缓存，预览仍可切换效果。 */
     void prepareSource(){
         if(source==null||busy)return;String key=sourceKey(),fullKey=key+"/"+sourceOptions.processingKey();
         if(preparedCache!=null&&fullKey.equals(preparedKey)){updateGrade();return;}
         prepareCancel.set(true);prepareCancel=new AtomicBoolean();final AtomicBoolean stop=prepareCancel;final int generation=++prepareGeneration;
-        final VideoSource input=source;final int requestedEdge=edge,requestedSamples=samples;final SourceOptions opts=sourceOptions.copy();
+        final VideoSource input=source;final int requestedEdge=edge,requestedSamples=samples;final boolean requestedPrecision=VideoColor.precision(input,exportFormat);final SourceOptions opts=sourceOptions.copy();
         final VideoSource.Cache reuse=key.equals(baseKey)?baseCache:null;preparing=true;prepareBar.setVisibility(View.VISIBLE);prepareStatus.setVisibility(View.VISIBLE);prepareBar.setProgress(0);TimeEstimate eta=new TimeEstimate();if(panels!=null)panels.updateProgress(true,t("准备素材…","Preparing source…"),0);
         preparer.execute(()->{
             VideoSource.Cache base=null,small=null;SourceProcessor.Result result=null;
             try{
                 VideoSource.Progress progress=(p,label)->post(()->{if(generation==prepareGeneration){prepareBar.setProgress((int)(p*1000));prepareStatus.setText(prepareLabel(label,p,eta.remaining(p,english)));if(panels!=null)panels.updateProgress(true,prepareStatus.getText().toString(),p);}});
-                base=reuse!=null?reuse:input.read(requestedEdge,requestedSamples,stop,(p,label)->progress.update(.25f*p,label));VideoSource.check(stop);
+                base=reuse!=null?reuse:input.read(requestedEdge,requestedSamples,stop,(p,label)->progress.update(.25f*p,label),requestedPrecision);VideoSource.check(stop);
                 result=SourceProcessor.process(this,base,opts,stop,(p,label)->progress.update(.25f+.7f*p,label));VideoSource.check(stop);
                 small=SourceProcessor.preview(this,result.cache,480);VideoSource.check(stop);
                 final VideoSource.Cache newBase=base,newPreview=small;final SourceProcessor.Result ready=result;
@@ -266,29 +267,29 @@ public final class MainActivity extends Activity {
     void startExport(){
         if(busy){cancel.set(true);message(t("正在安全取消…","Cancelling safely…"));return;}if(source==null){message(t("请先导入素材","Import media first"));return;}if(selected.isEmpty())return;
         if(preparing||preparedCache==null||!preparedKey.equals(sourceKey()+"/"+sourceOptions.processingKey())){exportAfterPreparation=true;updateButton();if(!preparing)prepareSource();return;}
-        int[] size=source.size(edge);int count=samples<=0?(int)Math.ceil(source.durationUs/1e6*source.fps):samples;float seconds=0;for(int id:selected)seconds+=effectById(id).seconds(settings.get(id));ExportSafety.Assessment risk=ExportSafety.inspect(size[0],size[1],fps,bitrate,count,seconds);
+        int[] size=source.size(edge);int count=samples<=0?(int)Math.ceil(source.durationUs/1e6*source.fps):samples;float seconds=0;for(int id:selected)seconds+=effectById(id).seconds(settings.get(id));ExportSafety.Assessment risk=ExportSafety.inspect(size[0],size[1],fps,bitrate,count,seconds,exportFormat);
         if(risk.highLoad){String description=size[0]+" × "+size[1]+" · "+fps+" fps · "+(formatValue(ExportQuality.resolve(size[0],size[1],fps,bitrate)/1000000f)+" Mbps")+"\n\n"+t("这组参数会增加耗时、耗电和发热。请保持设备通风，并预留足够空间。","These settings increase rendering time, power use and heat. Keep the device ventilated and leave enough free space.")+"\n\n"+(risk.hardwareSupported?t("已找到支持所选参数的硬件编码器。","A hardware encoder supports these settings."):t("未确认硬件编码支持，可能需要兼容编码或调整参数。","Hardware encoding support is unconfirmed. Compatibility encoding or different settings may be needed."));riskDialog=StudioUi.alertBuilder(this).setTitle(t("高负载导出","High-load export")).setMessage(description).setPositiveButton(t("继续导出","Export anyway"),(d,w)->beginExport()).setNegativeButton(t("调整","Adjust"),(d,w)->showInspector(3)).setNeutralButton("1080p / 30fps",(d,w)->{edge=1920;fps=30;bitrate=0;exportAfterPreparation=true;prepareSource();}).show();}
         else beginExport();
     }
 
     /* 借用已经完成的正式缓存，不在导出时再执行稳定去闪。 */
     void beginExport(){
-        if(renderer==null||preparedCache==null)return;playing=false;busy=true;version++;cancel=new AtomicBoolean();AtomicBoolean stop=cancel;final VideoSource.Cache cache=preparedCache;final VideoSource input=source;final int outputFps=fps,outputBits=bitrate;final boolean sound=keepSound,smoothGradient=gradientDither;final Uri target=outputTree;
+        if(renderer==null||preparedCache==null)return;playing=false;busy=true;version++;cancel=new AtomicBoolean();AtomicBoolean stop=cancel;final VideoSource.Cache cache=preparedCache;final VideoSource input=source;final int outputFps=fps,outputBits=bitrate;final String outputFormat=exportFormat;final boolean sound=keepSound,smoothGradient=gradientDither;final Uri target=outputTree;
         List<Effect> jobs=new ArrayList<>();Map<Integer,Effect.Settings> snapshots=new HashMap<>();
         for(int id:selected){jobs.add(effectById(id));snapshots.put(id,settings.get(id).copy());}
         updateButton();queue.removeAllViews();queue.setVisibility(View.GONE);exportBar.setProgress(0);getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);TimeEstimate eta=new TimeEstimate();
         worker.execute(()->{try{
             int all=0;for(Effect effect:jobs)all+=Math.max(1,Math.round(effect.seconds(snapshots.get(effect.id))*outputFps));int completed=0,index=0;
-            for(Effect effect:jobs){VideoSource.check(stop);Effect.Settings s=snapshots.get(effect.id);s.exportDither=smoothGradient;int total=Math.max(1,Math.round(effect.seconds(s)*outputFps));File movie=new File(getCacheDir(),"render_"+UUID.randomUUID()+".mp4");
+            for(Effect effect:jobs){VideoSource.check(stop);Effect.Settings s=snapshots.get(effect.id);s.exportDither=smoothGradient;s.exportFormat=outputFormat;int total=Math.max(1,Math.round(effect.seconds(s)*outputFps));File movie=new File(getCacheDir(),"render_"+UUID.randomUUID()+".mp4");
                 try{ByteBuffer first=null;Uri audio=input.uri;boolean withAudio=sound;
-                    try(VideoEncoder encoder=new VideoEncoder(this,audio,movie,cache.w,cache.h,outputFps,withAudio,stop,outputBits)){
+                    try(VideoEncoder encoder=new VideoEncoder(this,audio,movie,cache.w,cache.h,outputFps,withAudio,stop,outputBits,outputFormat)){
                         for(int frame=0;frame<total;frame++){
                             int heat=ExportSafety.pace(this,stop);float at=frame/(float)Math.max(1,effect.family==0&&s.dayNightSplit?total-1:total);ByteBuffer pixels=renderer.frame(cache,effect,s,at,0);if(frame==0)first=pixels;encoder.append(pixels,frame);
                             final int done=completed+frame+1,allFrames=all;final float fraction=done/(float)allFrames;final String state=name(effect)+" · "+(frame+1)+"/"+total+" · "+deviceLabel()+" / "+tr(encoder.label);
                             post(()->{exportBar.setProgress((int)(fraction*1000));exportStatus.setText(Math.round(fraction*100)+"% · "+eta.remaining(fraction,english)+(heat>=PowerManager.THERMAL_STATUS_MODERATE?t(" · 温度偏高，放慢处理"," · warm device, pacing render"):""));message(state);});
                         }encoder.finish(total/(float)outputFps);
                     }
-                    VideoSource.check(stop);VideoValidator.check(movie,first,cache.w,cache.h);String label=String.format(Locale.ROOT,"%02d_",++index)+name(effect);Uri saved=save(movie,label,stop,target);lastOutput=saved;completed+=total;
+                    VideoSource.check(stop);VideoValidator.check(this,movie,first,cache.w,cache.h,outputFormat,stop);String label=String.format(Locale.ROOT,"%02d_",++index)+name(effect);Uri saved=save(movie,label,stop,target);lastOutput=saved;completed+=total;
                     post(()->{queue.removeAllViews();queue.setVisibility(View.VISIBLE);TextView item=text(t("已保存 · 查看","Saved · View"),12,0xffa9d8ff);add(queue,item,36);item.setOnClickListener(v->startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(saved,"video/mp4").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)));});
                 }finally{movie.delete();}
             }

@@ -17,6 +17,7 @@ def check_bitrate_controls(window, studio, qt, app, page):
     assert qt.QMetaObject.invokeMethod(field, "editingFinished")
     app.processEvents()
     assert studio.state["settings"]["bitrateMbps"] == 73.5
+
     assert studio.state["exportBitrateMbps"] == 73.5
     assert studio.preview_serial == serial
     for invalid in (-5, 0.5, 501, float("nan"), float("inf"), True):
@@ -24,3 +25,19 @@ def check_bitrate_controls(window, studio, qt, app, page):
         assert studio.state["settings"]["bitrateMbps"] == 73.5
     studio.setActive(100)
     assert studio.state["settings"]["bitrateMbps"] == 73.5
+
+
+def check_format_controls(window, studio, qt, app, page):
+    """逐个触发真实格式下拉框，确保不是只有标签而控制器仍输出旧格式。"""
+    window.setProperty("inspectorPage", page)
+    app.processEvents()
+    field = window.findChild(qt.QObject, "exportFormat")
+    assert field is not None
+    for index, name in enumerate(("h264", "hevc10", "hdr_pq", "hdr_hlg")):
+        field.setProperty("currentIndex", index)
+        assert qt.QMetaObject.invokeMethod(field, "activated", qt.Q_ARG(int, index))
+        app.processEvents()
+        assert studio.state["settings"]["exportFormat"] == name
+    studio.setSetting("exportFormat", "not-a-format")
+    assert studio.state["settings"]["exportFormat"] == "hdr_hlg"
+    studio.setSetting("exportFormat", "h264")

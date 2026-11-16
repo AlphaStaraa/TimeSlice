@@ -20,6 +20,7 @@ from source_processing import (
     process_cache,
     source_color_curve,
 )
+from video_color import precision_required
 
 
 class SourceController(MacController):
@@ -90,7 +91,7 @@ class SourceController(MacController):
         old = self.global_settings.get(key)
         super().setSetting(key, value)
         if (
-            key in ("longEdge", "quality")
+            key in ("longEdge", "quality", "exportFormat")
             and old != self.global_settings.get(key)
             and self.original_cache is not None
         ):
@@ -194,6 +195,7 @@ class SourceController(MacController):
                     folder,
                     token,
                     lambda fraction: progress("读取正式素材", 0.30 * fraction),
+                    precision=precision_required(info, settings),
                 )
                 report = process_cache(
                     full,
@@ -252,8 +254,11 @@ class SourceController(MacController):
                 old = self.original_cache
                 if old is not None and old is not self.cache:
                     self.preview.submit(old.discard)
-                self.color_curve = source_color_curve(cache.data)
-                analysis = analyze_direction(cache.data)
+                from precision_processing import analysis_pixels
+
+                pixels = analysis_pixels(cache)
+                self.color_curve = source_color_curve(pixels)
+                analysis = analyze_direction(pixels)
                 self._state.update(
                     dayNightDetected=analysis["direction"],
                     dayNightConfidence=analysis["confidence"],

@@ -1,6 +1,7 @@
 """显式自检完整版真实界面、稳定去闪缓存、实时调色和GPU导出。"""
 
 import json
+import sys
 import time
 import traceback
 from pathlib import Path
@@ -10,14 +11,19 @@ from PySide6.QtCore import QObject, QTimer, Slot
 
 
 class FullPackageCheck(QObject):
-    def __init__(self, app, studio, engine, output, source, require_gpu, warnings):
+    def __init__(
+        self, app, studio, engine, output, source, require_gpu, warnings, output_format="h264"
+    ):
         """仅测试入口启用，偏好和缓存由主入口隔离，不操作用户素材。"""
         super().__init__()
         self.app, self.studio, self.engine = app, studio, engine
         self.output, self.source = Path(output), Path(source)
         self.require_gpu, self.warnings = require_gpu, warnings
+        self.output_format = output_format
         self.phase, self.started = 0, time.monotonic()
-        self.report = dict(packaged=True, profile="full", requireGpu=require_gpu)
+        self.report = dict(
+            packaged=bool(getattr(sys, "frozen", False)), profile="full", requireGpu=require_gpu
+        )
         self.timer = QTimer(self)
         self.timer.setInterval(50)
         self.timer.timeout.connect(self.tick)
@@ -27,7 +33,7 @@ class FullPackageCheck(QObject):
     def tick(self):
         """沿正常控制器流程准备缓存、改HSL、导出；过期或失败保留诊断。"""
         try:
-            if time.monotonic() - self.started > 150:
+            if time.monotonic() - self.started > 300:
                 raise TimeoutError("Full package self-check timed out")
             studio, state = self.studio, self.studio.state
             if state["error"] or state.get("processingError"):
@@ -45,6 +51,7 @@ class FullPackageCheck(QObject):
                     quality="full",
                     engine="gpu" if self.require_gpu else "auto",
                     encoder="auto",
+                    exportFormat=self.output_format,
                 ).items():
                     studio.setSetting(key, value)
                 studio.importSource(str(self.source))
@@ -104,9 +111,14 @@ class FullPackageCheck(QObject):
                 )
                 frames = sum(bool(x) and not x.startswith("#") for x in decoded.stdout.splitlines())
                 assert frames == 6
+                if self.output_format != "h264":
+                    assert record["verifiedColor"]["lumaBits"] == 10
+                    assert record["sourceCache"]["pixelFormat"] == "x2rgb10le"
                 self.engine.rootObjects()[0].grabWindow().save(str(self.output / "界面预览.png"))
                 assert not self.warnings, self.warnings
                 self.report.update(
+                    outputFormat=self.output_format,
+                    verifiedColor=record.get("verifiedColor"),
                     stabilization=True,
                     deflicker=True,
                     realtimeHsl=True,

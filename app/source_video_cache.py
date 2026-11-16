@@ -8,6 +8,7 @@ from pathlib import Path
 
 from media import FrameCache
 from model import dimensions
+from video_color import precision_required
 
 
 def video_key(info, settings):
@@ -16,7 +17,14 @@ def video_key(info, settings):
     stat = path.stat()
     size = dimensions(info, settings["longEdge"])
     fps = info["fps"] if settings["quality"] == "full" else min(30, info["fps"])
-    identity = (str(path), stat.st_size, stat.st_mtime_ns, *size, fps)
+    identity = (
+        str(path),
+        stat.st_size,
+        stat.st_mtime_ns,
+        *size,
+        fps,
+        precision_required(info, settings),
+    )
     return hashlib.sha256(json.dumps(identity).encode()).hexdigest()
 
 
@@ -45,6 +53,7 @@ class VideoCache:
                 folder,
                 cancel,
                 lambda value: notify(-1, "读取原片", value, "准备切片素材"),
+                precision=precision_required(info, settings),
             )
             self.folder, self.key = folder, key
             return cache, False

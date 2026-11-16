@@ -27,7 +27,9 @@ public final class Renderer implements AutoCloseable {
 
     /* 按当前时间与效果生成一帧画面。 */ public ByteBuffer frame(VideoSource.Cache cache,Effect effect,Effect.Settings settings,float u,int view) throws Exception {
         ByteBuffer output=ByteBuffer.allocateDirect(cache.w*cache.h*4).order(ByteOrder.nativeOrder());
-        ByteBuffer p=effect.params(settings,cache.w,cache.h,cache.frames,u,view);
+        if(VideoColor.high(settings.exportFormat)&&!cache.precision)throw new Exception("请先准备高精度素材缓存，不能把8位缓存当成10位输出。");
+        Effect.Settings snapshot=settings.copy();snapshot.colorFlags=VideoColor.flags(cache,settings.exportFormat);snapshot.sourcePeak=cache.sourcePeak;
+        ByteBuffer p=effect.params(snapshot,cache.w,cache.h,cache.frames,u,view);
         ByteBuffer mapping=settings.timeMap==null?null:settings.timeMap.buffer(cache.w,cache.h,settings.mapMode==1);
         if(gpu!=null && view!=1){
             try {

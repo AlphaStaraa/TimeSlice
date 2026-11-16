@@ -71,6 +71,7 @@ FILES += (
     "mobile/tests/StableManifest.xml",
     "mobile/tests/PhysicalInstrumentation.java",
     "mobile/tests/UiReviewInstrumentation.java",
+    "mobile/tests/HdrInstrumentation.java",
 )
 EXCLUDE_DIRS = {
     "build",

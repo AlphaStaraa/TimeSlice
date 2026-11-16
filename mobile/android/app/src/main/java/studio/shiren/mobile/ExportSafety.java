@@ -14,16 +14,18 @@ public final class ExportSafety {
     }
 
     /* 分开检查尺寸、帧率和目标码率，不能只看手机能否播放4K。 */
-    public static Assessment inspect(int w,int h,int fps,int bitrate,int samples,float seconds){
+    public static Assessment inspect(int w,int h,int fps,int bitrate,int samples,float seconds){return inspect(w,h,fps,bitrate,samples,seconds,"h264");}
+    /* 输出格式与P010能力也参与预检，不能以AVC能力冒充Main10。 */
+    public static Assessment inspect(int w,int h,int fps,int bitrate,int samples,float seconds,String format){
         Assessment result=new Assessment();int bits=ExportQuality.resolve(w,h,fps,bitrate);
         result.highLoad=Math.max(w,h)>=2560||fps>=50||bits>=35000000;
         result.targetBytes=(long)(bits/8.*seconds);result.cacheBytes=(long)w*h*4*samples;
         for(MediaCodecInfo codec:new MediaCodecList(MediaCodecList.REGULAR_CODECS).getCodecInfos()){
             if(!codec.isEncoder())continue;
             try{
-                MediaCodecInfo.CodecCapabilities caps=codec.getCapabilitiesForType("video/avc");
+                MediaCodecInfo.CodecCapabilities caps=codec.getCapabilitiesForType(VideoColor.high(format)?"video/hevc":"video/avc");
                 MediaCodecInfo.VideoCapabilities video=caps.getVideoCapabilities();
-                if(video!=null&&video.areSizeAndRateSupported(w,h,fps)&&video.getBitrateRange().contains(bits)){
+                if(video!=null&&video.areSizeAndRateSupported(w,h,fps)&&video.getBitrateRange().contains(bits)&&caps.isFormatSupported(VideoColor.format(w,h,fps,bitrate,format))){
                     result.encoder=codec.getName();if(codec.isHardwareAccelerated()){result.hardwareSupported=true;break;}
                 }
             }catch(IllegalArgumentException ignored){/* 该编码器不支持AVC，继续核查其他编码器。 */}

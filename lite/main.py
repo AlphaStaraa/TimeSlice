@@ -30,6 +30,9 @@ def main():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--self-check", type=Path)
     parser.add_argument("--require-gpu", action="store_true")
+    parser.add_argument(
+        "--self-check-format", choices=("h264", "hevc10", "hdr_pq", "hdr_hlg"), default="h264"
+    )
     options, _ = parser.parse_known_args()
     app = QGuiApplication(sys.argv)
     app.setFont(QFontDatabase.systemFont(QFontDatabase.GeneralFont))
@@ -70,7 +73,12 @@ def main():
         from self_check import PackageCheck
 
         check = PackageCheck(
-            app, controller, engine, options.self_check.resolve(), options.require_gpu
+            app,
+            controller,
+            engine,
+            options.self_check.resolve(),
+            options.require_gpu,
+            options.self_check_format,
         )
         app._package_check = check
     result = app.exec()

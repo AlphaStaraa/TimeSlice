@@ -6,7 +6,7 @@ import java.util.*;
 import org.json.*;
 
 public final class Effect {
-    public static final int PARAM_BYTES = 160;
+    public static final int PARAM_BYTES = 176;
     private static final float[][] CENTERS = {{.5f,1},{.5f,0},{0,.5f},{1,.5f},{.5f,.5f}};
     public int id,family,shape,slices,origin;
     public String key,name,description;
@@ -39,7 +39,8 @@ public final class Effect {
         public float rotationStartAngle=0, discardRatio=.60f,sourceStart=0,sourceEnd=1,centerX=.5f,centerY=.5f;
         public boolean reverse=false, dayNightSplit=false, smooth=false, exportDither=false;
         public TimeMap timeMap=null;
-        public int mapMode=0,waveSources=2;
+        public int mapMode=0,waveSources=2,colorFlags=0;
+        public float sourcePeak=1000;public String exportFormat="h264";
         /* 复制当前设置以隔离后台任务与界面编辑。 */ public Settings copy(){
             try { return (Settings)super.clone(); }
             catch(CloneNotSupportedException error) { throw new AssertionError(error); }
@@ -81,11 +82,11 @@ public final class Effect {
         float[] f={u,split?Math.max(0,Math.min(1,u))*build:u,frames-1,(float)ow/oh,n,pix?1:0,s.span>0?s.span:span,
             s.cycles>0?s.cycles:cycles,c[0]+s.centerX-.5f,c[1]+s.centerY-.5f,shape==2||shape==12?s.angle:shape==4?s.rotationStartAngle:0,
             s.turns<0?turns:s.turns,build,s.softness,s.density,s.reverse?1:0,s.sourceStart,s.sourceEnd,ow,oh};
-        int flags=(s.smooth?1:0)|(split?1024:0)|(s.mapMode==1?2:0)|(s.exportDither?4096:0);
+        int flags=(s.smooth?1:0)|(split?1024:0)|(s.mapMode==1?2:0)|(s.exportDither?4096:0)|s.colorFlags;
         if(s.timeMap!=null)flags|=s.timeMap.bits==8?4:s.timeMap.bits==16?8:0;
         int[] v={family,shape,id,ending(s),s.direction,s.playback,o,view,frames,s.timeMap!=null&&family!=3?1:0,s.waveSources,flags};
         float strength=view==0&&shadowEnabled(s)?s.shadowStrength:0;
-        float[] shading={strength,s.shadowWidth,s.shadowSoftness,s.shadowSide,w,h,0,split?s.discardRatio:0};
+        float[] shading={strength,s.shadowWidth,s.shadowSoftness,s.shadowSide,w,h,0,split?s.discardRatio:0,s.sourcePeak,203,1000,0};
         ByteBuffer b=ByteBuffer.allocateDirect(PARAM_BYTES).order(ByteOrder.nativeOrder());
         for(float x:f)b.putFloat(x);
         for(int x:v)b.putInt(x);

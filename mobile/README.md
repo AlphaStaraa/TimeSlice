@@ -1,6 +1,6 @@
 # Android
 
-当前为1.0.4画质预览版，独立版本由 [android-release.json](android-release.json) 维护。
+当前为1.0.5 HDR预览版，独立版本由 [android-release.json](android-release.json) 维护。
 只接收视频，保留切片调整、视频处理和导出；不再提供照片序列流程。
 
 - [使用指南](../docs/使用指南.md)：导入、参数、输出与手机负载提示。

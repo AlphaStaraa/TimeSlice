@@ -10,8 +10,18 @@ from pathlib import Path
 import numpy as np
 from core.engine import CPUEngine, GPUEngine
 from export_quality import bitrate_report
-from media import FrameCache, check, choose_encoder, encode_args, popen, stop_process, time_map
+from media import (
+    FrameCache,
+    check,
+    choose_encoder,
+    encode_args,
+    popen,
+    stop_process,
+    time_map,
+    verify_output,
+)
 from model import MAC42, density, duration
+from video_color import color_settings, precision_required
 
 
 # 根据帧数与显存绑定限制计算安全的空间分块尺寸。
@@ -85,6 +95,7 @@ class RenderJob:
             workspace,
             self.cancel,
             lambda v: self.update(-1, "读取原片", v, "建立时间缓存"),
+            precision=precision_required(self.info, first),
         )
 
     # 按用户选择建立 GPU 或 CPU 渲染器，必要时回退。
@@ -114,9 +125,16 @@ class RenderJob:
             self.update(-1, "读取原片", 0, "按所选时间精度建立缓存；不降低输出尺寸")
             cache = self.prepare_cache(first, workspace, root)
             engine = self.create_engine(first)
-            encoder = choose_encoder(first["encoder"])
+            encoder = choose_encoder(first["encoder"], first.get("exportFormat", "h264"))
             for i, (effect, s) in enumerate(self.jobs):
-                s = dict(s, _exportDither=bool(s.get("gradientDither", True)))
+                s = color_settings(
+                    cache,
+                    dict(
+                        s,
+                        _exportDither=bool(s.get("gradientDither", True)),
+                        _exportFormat=s.get("exportFormat", "h264"),
+                    ),
+                )
                 check(self.cancel)
                 start = time.monotonic()
                 total = round(duration(effect, s) * s["fps"])
@@ -187,6 +205,7 @@ class RenderJob:
                                 s["keepAudio"],
                                 raw,
                                 bitrate_mbps=s.get("bitrateMbps", 0),
+                                output_format=s.get("exportFormat", "h264"),
                             )
                             process = popen(
                                 self.encoder_args(args, progress_file),
@@ -213,6 +232,7 @@ class RenderJob:
                                 self.info,
                                 s["keepAudio"],
                                 bitrate_mbps=s.get("bitrateMbps", 0),
+                                output_format=s.get("exportFormat", "h264"),
                             )
                             process = popen(
                                 self.encoder_args(args, progress_file),
@@ -244,6 +264,7 @@ class RenderJob:
                             + log.read_text(errors="replace", encoding="utf-8")[-1000:]
                         )
                     check(self.cancel)
+                    verified_color = verify_output(partial, s.get("exportFormat", "h264"))
                     partial.rename(final)
                     elapsed = time.monotonic() - start
                     item = dict(
@@ -252,8 +273,13 @@ class RenderJob:
                         output=str(final),
                         engine=used,
                         encoder=encoder,
+                        verifiedColor=verified_color,
                         encoding=bitrate_report(
-                            cache.width, cache.height, s["fps"], s.get("bitrateMbps", 0)
+                            cache.width,
+                            cache.height,
+                            s["fps"],
+                            s.get("bitrateMbps", 0),
+                            s.get("exportFormat", "h264"),
                         ),
                         frames=total,
                         seconds=elapsed,

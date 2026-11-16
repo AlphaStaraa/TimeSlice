@@ -9,10 +9,11 @@ import uuid
 
 import numpy as np
 from export_quality import bitrate_report
-from media import check, choose_encoder, encode_args, popen, stop_process, time_map
+from media import check, choose_encoder, encode_args, popen, stop_process, time_map, verify_output
 from model import density, duration
 from render import gpu_tile
 from spatial_export import spatial_frames, use_spatial_cache, workspace_root
+from video_color import color_settings
 
 
 class StreamingExport:
@@ -124,7 +125,7 @@ class StreamingExport:
             self.update(-2, "输出文件夹", 0, str(root))
             cache = self.prepare_cache(first, workspace, root)
             engine = self.create_engine(first)
-            encoder = choose_encoder(first["encoder"])
+            encoder = choose_encoder(first["encoder"], first.get("exportFormat", "h264"))
             for index, (effect, settings) in enumerate(self.jobs):
                 check(self.cancel)
                 self.effect_pipeline = "streamed"
@@ -138,7 +139,14 @@ class StreamingExport:
                 progress = workspace / f"encode_{index}.progress"
                 process = None
                 mapping = None
-                settings = dict(settings, _exportDither=bool(settings.get("gradientDither", True)))
+                settings = color_settings(
+                    cache,
+                    dict(
+                        settings,
+                        _exportDither=bool(settings.get("gradientDither", True)),
+                        _exportFormat=settings.get("exportFormat", "h264"),
+                    ),
+                )
                 if settings.get("customMap") and settings.get("mapPath"):
                     mapping, bits = time_map(
                         settings["mapPath"], cache.width, cache.height, settings["mapMode"] == 1
@@ -156,6 +164,7 @@ class StreamingExport:
                         self.info,
                         settings["keepAudio"],
                         bitrate_mbps=settings.get("bitrateMbps", 0),
+                        output_format=settings.get("exportFormat", "h264"),
                     )
                     with log.open("wb") as error:
                         process = popen(
@@ -176,6 +185,7 @@ class StreamingExport:
                             + log.read_text(errors="replace", encoding="utf-8")[-1000:]
                         )
                     check(self.cancel)
+                    verified_color = verify_output(partial, settings.get("exportFormat", "h264"))
                     partial.rename(final)
                     report.append(
                         dict(
@@ -184,11 +194,13 @@ class StreamingExport:
                             output=str(final),
                             engine=engine.label,
                             encoder=encoder,
+                            verifiedColor=verified_color,
                             encoding=bitrate_report(
                                 cache.width,
                                 cache.height,
                                 settings["fps"],
                                 settings.get("bitrateMbps", 0),
+                                settings.get("exportFormat", "h264"),
                             ),
                             frames=total,
                             seconds=time.monotonic() - start,

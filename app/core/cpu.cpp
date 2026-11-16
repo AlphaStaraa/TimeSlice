@@ -1,6 +1,7 @@
 #include "cpu_math.h"
 #include "field_common.h"
 #include "quantization.h"
+#include <cstring>
 #ifdef _WIN32
 #define API extern "C" __declspec(dllexport)
 #else
@@ -72,30 +73,61 @@ bool needsAA53(float2 uv,TFParams p,float mapValue);
 #define SHIREN_GRADE_CPU 1
 #define GRADE(i) gradedata[int(i)]
 #include "grade.h"
+#include "color_management.h"
+#include "grade_precision.h"
 #undef GRADE
-/* 对轻量源纹理做双线性与时间插值，并按源时刻调色。 */ static Color53 source53(const uint8_t* src,int sw,int sh,int frames,float duration,float n,float2 uv,const float* grade){
+/* 从紧凑缓存读取一个像素，HDR在线性目标色域参与插值。 */
+static Color53 sourcePixel106(const uint8_t* src,uint64_t index,TFParams p){uint v;std::memcpy(&v,src+index*4,4);return inputColor106(rawColor106(v,p),p);}
+/* 按源帧分别插值与调色，再进行时间插值，保留真实10位和HDR高光。 */
+static Color53 source53(const uint8_t* src,int sw,int sh,int frames,float duration,float n,float2 uv,const float* grade,TFParams p){
  float at=clamp(n*duration,0.f,float(frames-1));int a=int(at),b=std::min(a+1,frames-1);
  float xx=clamp(uv.x*sw-.5f,0.f,float(sw-1)),yy=clamp(uv.y*sh-.5f,0.f,float(sh-1));
  int x=int(xx),y=int(yy),x1=std::min(x+1,sw-1),y1=std::min(y+1,sh-1);float fx=xx-x,fy=yy-y;
  auto frame=[&](int i){
-  float c[3];for(int k=0;k<3;k++){
-   auto v=[&](int x,int y){return src[((uint64_t(i)*sh+y)*sw+x)*4+k]/255.f;};
-   c[k]=lerp(lerp(v(x,y),v(x1,y),fx),lerp(v(x,y1),v(x1,y1),fx),fy);
+  if((p.flags&SRC10_106)!=0&&p.outputW==float(sw)&&p.outputH==float(sh)){
+   int px=std::min(sw-1,std::max(0,int(uv.x*sw))),py=std::min(sh-1,std::max(0,int(uv.y*sh)));
+   Color53 c=sourcePixel106(src,(uint64_t(i)*sh+py)*sw+px,p);return grade?(linearColor106(p)?gradeLinear106(c,i,p,grade):grade53(c,i,grade)):c;
   }
-  Color53 out=color53(c[0],c[1],c[2]);return grade ? grade53(out,i,grade):out;
+  Color53 aa=sourcePixel106(src,(uint64_t(i)*sh+y)*sw+x,p),bb=sourcePixel106(src,(uint64_t(i)*sh+y)*sw+x1,p),cc=sourcePixel106(src,(uint64_t(i)*sh+y1)*sw+x,p),dd=sourcePixel106(src,(uint64_t(i)*sh+y1)*sw+x1,p);
+  Color53 c=color53(lerp(lerp(aa.r,bb.r,fx),lerp(cc.r,dd.r,fx),fy),lerp(lerp(aa.g,bb.g,fx),lerp(cc.g,dd.g,fx),fy),lerp(lerp(aa.b,bb.b,fx),lerp(cc.b,dd.b,fx),fy));
+  return grade?(linearColor106(p)?gradeLinear106(c,i,p,grade):grade53(c,i,grade)):c;
  };
  Color53 ca=frame(a),cb=frame(b);return color53(lerp(ca.r,cb.r,at-a),lerp(ca.g,cb.g,at-a),lerp(ca.b,cb.b,at-a));
 }
 /* 按时间场混合源帧，再应用切片遮光与阴影。 */ static Color53 fieldColor53(Field f,TFParams p,const uint8_t* src,int sw,int sh,float2 uv,const float* grade){
  float t=clamp(f.weight,0.f,1.f);
  if(p.viewMode==2){float v=adjusted3(lerp(clamp(f.a,0.f,1.f),clamp(f.b,0.f,1.f),t),p);return color53(v,v,v);}
- Color53 a=source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3(t==1?f.b:f.a,p),uv,grade);
+ Color53 a=source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3(t==1?f.b:f.a,p),uv,grade,p);
  if(t==1){a.r*=f.shade;a.g*=f.shade;a.b*=f.shade;}
- else if(t>0){Color53 b=source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3(f.b,p),uv,grade);a=color53(lerp(a.r,b.r*f.shade,t),lerp(a.g,b.g*f.shade,t),lerp(a.b,b.b*f.shade,t));}
+ else if(t>0){Color53 b=source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3(f.b,p),uv,grade,p);a=color53(lerp(a.r,b.r*f.shade,t),lerp(a.g,b.g*f.shade,t),lerp(a.b,b.b*f.shade,t));}
  return color53(a.r*f.light,a.g*f.light,a.b*f.light);
 }
+/* 反射边界只用于重采样，不向高精度稳定画面填入黑边。 */
+static int reflect106(int value,int length){if(length<=1)return 0;int period=2*(length-1);value%=period;if(value<0)value+=period;return value<length?value:period-value;}
+/* 在原色域的线性亮度中采样，供10位稳定、去闪和预览缩小共用。 */
+static Color53 transformPixel106(const uint8_t* src,int sw,int sh,int x,int y,TFParams p){uint v;uint64_t offset=uint64_t(reflect106(y,sh))*sw+reflect106(x,sw);std::memcpy(&v,src+offset*4,4);return sourceLinear106(rawColor106(v,p),p);}
+/* 高精度重采样及曝光修正；preserve为真时写回源RGB10编码，否则输出SDR分析代理。 */
+API void transform_precision(const TFParams* params,int sw,int sh,int dw,int dh,int y0,int rows,const float* matrix,const float* gains,const uint8_t* src,uint8_t* output,int preserve){
+ TFParams p=*params;
+ for(int y=y0;y<std::min(dh,y0+rows);y++)for(int x=0;x<dw;x++){
+  float xx=matrix[0]*x+matrix[1]*y+matrix[2],yy=matrix[3]*x+matrix[4]*y+matrix[5];int ix=int(floor(xx)),iy=int(floor(yy));float fx=xx-ix,fy=yy-iy;
+  Color53 a=transformPixel106(src,sw,sh,ix,iy,p),b=transformPixel106(src,sw,sh,ix+1,iy,p),c=transformPixel106(src,sw,sh,ix,iy+1,p),d=transformPixel106(src,sw,sh,ix+1,iy+1,p);
+  Color53 value=color53(lerp(lerp(a.r,b.r,fx),lerp(c.r,d.r,fx),fy)*gains[0],lerp(lerp(a.g,b.g,fx),lerp(c.g,d.g,fx),fy)*gains[1],lerp(lerp(a.b,b.b,fx),lerp(c.b,d.b,fx),fy)*gains[2]);
+  uint packed;
+  if(preserve){
+   if((p.flags&(SRC_PQ106|SRC_HLG106))==0){float peak=max(1.f,max(value.r,max(value.g,value.b)));value=color53(value.r/peak,value.g/peak,value.b/peak);}
+   value=sourceSignal106(value,p);packed=(3u<<30)|(uint(round(clamp(value.r,0.f,1.f)*1023.f))<<20)|(uint(round(clamp(value.g,0.f,1.f)*1023.f))<<10)|uint(round(clamp(value.b,0.f,1.f)*1023.f));
+  }else{
+   if((p.flags&SRC2020_106)!=0)value=to709_106(value);
+   // 已在线性域解码，强制经过正确的SDR显示变换。
+   TFParams target=p;if(!linearColor106(target))target.flags|=SRC_SRGB106;
+   target.flags&=~(OUT10_106|OUT_PQ106|OUT_HLG106);packed=packColor106(value,x,y,target);
+  }
+  std::memcpy(output+((y-y0)*dw+x)*4,&packed,4);
+ }
+}
 /* 为一个输出像素选择解析覆盖或边缘面积采样路径。 */ static Color53 pixel53(TFParams p,float2 uv,const uint8_t* src,int sw,int sh,float map,const float* grade){
- if(p.viewMode==1)return source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3((p.flags&1024)!=0 ? p.u/max(.1f,p.build):p.u,p),uv,grade);
+ if(p.viewMode==1)return source53(src,sw,sh,p.frames,p.sourceDuration,adjusted3((p.flags&1024)!=0 ? p.u/max(.1f,p.build):p.u,p),uv,grade,p);
  Color53 result=color53(0,0,0);
  if(filteredFreeze52(p)){
   StripeFootprint52 foot=stripeFootprint52(uv,p);
@@ -118,7 +150,7 @@ bool needsAA53(float2 uv,TFParams p,float mapValue);
  TFParams p=*params;
  for(int y=y0;y<y0+rows;y++)for(int x=0;x<w;x++){
   Color53 c=pixel53(p,float2((x+.5f)/w,(y+.5f)/h),source,sw,sh,map?map[y*w+x]:0,grade);
-  uint8_t* d=out+((y-y0)*w+x)*4;d[0]=uint8_t(quantizeColor105(c.r,x,y,p.flags));d[1]=uint8_t(quantizeColor105(c.g,x,y,p.flags));d[2]=uint8_t(quantizeColor105(c.b,x,y,p.flags));d[3]=255;
+  uint value=packColor106(c,x,y,p);std::memcpy(out+((y-y0)*w+x)*4,&value,4);
  }
 }
 #endif

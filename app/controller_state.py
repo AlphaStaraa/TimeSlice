@@ -25,6 +25,7 @@ from model import (
 )
 from PySide6.QtCore import Property, QObject, QStandardPaths, Qt, QTimer, QUrl, Signal, Slot
 from render import RenderJob
+from video_color import output_spec
 
 
 class ControllerState(QObject):
@@ -138,6 +139,7 @@ class ControllerState(QObject):
                     "encoder",
                     "bitrateMbps",
                     "gradientDither",
+                    "exportFormat",
                 ]
             }
         )
@@ -293,6 +295,11 @@ class ControllerState(QObject):
     def setSetting(self, key, value):
         if key not in DEFAULTS and key != "mapPath":
             return
+        if key == "exportFormat":
+            try:
+                output_spec(value)
+            except (ValueError, TypeError):
+                return
         if key == "bitrateMbps":
             try:
                 value = validate_bitrate(value)
@@ -334,11 +341,12 @@ class ControllerState(QObject):
             "encoder",
             "bitrateMbps",
             "gradientDither",
+            "exportFormat",
         ]:
             self.global_settings[key] = value
         else:
             self.per_effect[self.active][key] = value
-        if key in ("bitrateMbps", "gradientDither"):
+        if key in ("bitrateMbps", "gradientDither", "exportFormat"):
             self.sync()
             return
         self.preview_serial += 1

@@ -23,8 +23,9 @@ class FullExportTests(unittest.TestCase):
         self.addCleanup(store.close)
         calls = []
 
-        def decode(info, edge, fps, folder, *args):
+        def decode(info, edge, fps, folder, *args, precision=False):
             """模拟一次成功解码，实际写入完整RGBA文件和缓存元数据。"""
+            assert not precision, "Legacy SDR fixture must not stand in for high precision"
             calls.append(folder)
             folder.mkdir()
             (folder / "frames.rgba").write_bytes(self.pixels.tobytes())

@@ -25,16 +25,16 @@ The current release candidates are **test builds**. Once published, choose an ar
 
 | Platform | Version | Requirements |
 | --- | --- | --- |
-| macOS full | 1.0.5 | Apple Silicon, macOS14+ |
-| macOS Lite | 1.0.5-lite.1 | Apple Silicon, macOS14+ |
-| Windows | 1.0.5-quality-preview.1 | Windows10 22H2 / 11, x64 |
-| Android | 1.0.4-quality-preview.1 | Android10+; export capabilities depend on the device |
+| macOS full | 1.0.6 | Apple Silicon, macOS14+ |
+| macOS Lite | 1.0.6-lite.1 | Apple Silicon, macOS14+ |
+| Windows | 1.0.6-hdr-preview.1 | Windows10 22H2 / 11, x64 |
+| Android | 1.0.5-hdr-preview.1 | Android10+ for 8-bit; Android13+ with P010 for 10-bit/HDR |
 
 Extract the full archive before launching. Import a video, select an effect and choose an output folder before your first export. Android supports the gallery or a chosen folder.
 
 The macOS test builds are locally signed and have not been notarized by Apple. Windows requires the complete extracted folder, including its runtime. Android updates require the same signing key as the installed build.
 
-Input is a timelapse video; output is SDR H.264/MP4. Temporal sampling blends adjacent frames. Optical-flow interpolation and HDR are not implemented. Full-detail 4K processing needs substantial temporary disk space. Mobile exports warn about demanding resolution, frame-rate and bitrate settings.
+Input is a timelapse video. Output supports H.264 8-bit SDR and HEVC Main10 SDR/PQ/HLG in MP4. Temporal sampling blends adjacent frames; optical-flow interpolation is not implemented. Full-detail 4K processing needs substantial temporary disk space. Mobile exports warn about demanding resolution, frame-rate and bitrate settings.
 
 ## Build and test
 
@@ -53,7 +53,7 @@ See the [build guide](docs/开发指南.md) for Lite, Android, compact FFmpeg/Op
 
 ## Export quality
 
-Bitrate follows the actual output resolution and frame rate, or accepts a custom target from 1 to 500 Mbps. Smooth gradients is enabled for export by default. Output remains 8-bit SDR H.264; it cannot restore color levels already missing in the source.
+Bitrate follows the actual output resolution and frame rate, or accepts a custom target from 1 to 500 Mbps. Smooth gradients is enabled for export by default. Output supports 8-bit SDR H.264 and HEVC Main10 SDR/PQ/HLG. It cannot restore color levels already missing in the source.
 
 ## Repository layout
 

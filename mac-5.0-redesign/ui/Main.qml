@@ -1162,6 +1162,11 @@ ApplicationWindow {
         visible: root.inspectorPage === 3
         Layout.fillWidth: true; spacing: 10
         InspectorRow {
+         caption:qsTr("格式")
+         Choice {objectName:"exportFormat";model:["H.264 · 8-bit SDR","HEVC · 10-bit SDR","HDR · PQ 10-bit","HDR · HLG 10-bit"];currentIndex:["h264","hevc10","hdr_pq","hdr_hlg"].indexOf(root.st.settings.exportFormat);onActivated:studio.setSetting("exportFormat",["h264","hevc10","hdr_pq","hdr_hlg"][currentIndex])}
+        }
+        MutedText {visible:root.st.settings.exportFormat==="hdr_pq"||root.st.settings.exportFormat==="hdr_hlg";text:qsTr("HDR预览以SDR映射显示，成片按所选HDR格式输出。");Layout.fillWidth:true;wrapMode:Text.WordWrap}
+        InspectorRow {
          caption: qsTr("分辨率")
          Choice {
           model: ["1080p", "2K", "4K", qsTr("跟随原片")]

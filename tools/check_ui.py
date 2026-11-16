@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from quality_ui import check_bitrate_controls
+from quality_ui import check_bitrate_controls, check_format_controls
 
 
 def main():
@@ -131,6 +131,7 @@ def main():
                 assert export_button.x() + export_button.width() <= window.width()
         window.setWidth(1320)
         check_bitrate_controls(window, controller, qt, app, 3)
+        check_format_controls(window, controller, qt, app, 3)
         controller.setLanguage("zh")
         controller.checked = {2}
         controller.setActive(2)

@@ -2,6 +2,8 @@
 
 import math
 
+from video_color import color_report
+
 MAX_BITRATE_MBPS = 500
 
 
@@ -31,13 +33,15 @@ def target_bitrate(width, height, fps, value=0):
     return round((manual or recommended_bitrate(width, height, fps)) * 1_000_000)
 
 
-def bitrate_report(width, height, fps, value=0):
+def bitrate_report(width, height, fps, value=0, output_format="h264"):
     """记录实际采用的目标，VBR实际文件码率可能低于目标，不伪报成实测值。"""
-    return dict(
+    report = dict(
         mode="custom" if validate_bitrate(value) else "recommended",
         targetMbps=target_bitrate(width, height, fps, value) / 1_000_000,
         rateControl="VBR",
-        colorSpace="Rec.709",
+        colorSpace="Rec.2020" if output_format in ("hdr_pq", "hdr_hlg") else "Rec.709",
         colorRange="limited",
         pixelFormat="yuv420p",
     )
+    report.update(color_report(output_format))
+    return report

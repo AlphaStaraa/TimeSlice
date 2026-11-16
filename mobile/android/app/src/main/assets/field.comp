@@ -48,6 +48,10 @@ struct TFParams_0
     float sampleH_0;
     float reserved0_0;
     float reserved1_0;
+    float sourcePeak_0;
+    float paperWhite_0;
+    float displayPeak_0;
+    float colorReserved_0;
 };
 
 
@@ -94,6 +98,10 @@ layout(std140) uniform block_TFParams_0
     float sampleH_0;
     float reserved0_0;
     float reserved1_0;
+    float sourcePeak_0;
+    float paperWhite_0;
+    float displayPeak_0;
+    float colorReserved_0;
 }param_0;
 
 layout(std430, binding = 3) readonly buffer StructuredBuffer_float_t_0 {
@@ -3311,6 +3319,14 @@ float frozenShadow53_0(vec2 _S199, float _S200)
     geometry_0.reserved0_0 = param_0.reserved0_0;
 
     geometry_0.reserved1_0 = param_0.reserved1_0;
+
+    geometry_0.sourcePeak_0 = param_0.sourcePeak_0;
+
+    geometry_0.paperWhite_0 = param_0.paperWhite_0;
+
+    geometry_0.displayPeak_0 = param_0.displayPeak_0;
+
+    geometry_0.colorReserved_0 = param_0.colorReserved_0;
 
     geometry_0.direction_0 = 0U;
 

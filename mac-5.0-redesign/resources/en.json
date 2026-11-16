@@ -471,5 +471,7 @@
   "码率": "Bitrate",
   "目标码率": "Target bitrate",
   "码率越高，文件越大。实际码率随画面变化。": "Higher bitrate increases file size. Actual bitrate varies with the image.",
-  "平滑渐变": "Smooth gradients"
+  "平滑渐变": "Smooth gradients",
+  "格式": "Format",
+  "HDR预览以SDR映射显示，成片按所选HDR格式输出。": "HDR previews use an SDR mapping. Export uses the selected HDR format."
 }

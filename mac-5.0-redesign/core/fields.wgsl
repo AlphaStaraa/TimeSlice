@@ -42,6 +42,10 @@ struct TFParams_std140_0
     @align(4) sampleH_0 : f32,
     @align(8) reserved0_0 : f32,
     @align(4) reserved1_0 : f32,
+    @align(16) sourcePeak_0 : f32,
+    @align(4) paperWhite_0 : f32,
+    @align(8) displayPeak_0 : f32,
+    @align(4) colorReserved_0 : f32,
 };
 
 @binding(0) @group(0) var<uniform> param_0 : TFParams_std140_0;
@@ -155,6 +159,10 @@ struct TFParams_0
      sampleH_0 : f32,
      reserved0_0 : f32,
      reserved1_0 : f32,
+     sourcePeak_0 : f32,
+     paperWhite_0 : f32,
+     displayPeak_0 : f32,
+     colorReserved_0 : f32,
 };
 
 fn filteredLight42_0( distance_2 : f32,  span_1 : f32,  coverage_0 : f32,  filterWidth_0 : f32,  repeat_0 : bool,  p_0 : TFParams_0) -> f32
@@ -3402,6 +3410,10 @@ fn frozenShadow53_1( _S296 : vec2<f32>,  _S297 : f32) -> f32
     geometry_1.sampleH_0 = param_0.sampleH_0;
     geometry_1.reserved0_0 = param_0.reserved0_0;
     geometry_1.reserved1_0 = param_0.reserved1_0;
+    geometry_1.sourcePeak_0 = param_0.sourcePeak_0;
+    geometry_1.paperWhite_0 = param_0.paperWhite_0;
+    geometry_1.displayPeak_0 = param_0.displayPeak_0;
+    geometry_1.colorReserved_0 = param_0.colorReserved_0;
     geometry_1.direction_0 = u32(0);
     var _S299 : bool;
     if(((param_0.direction_0) >= u32(2)))
@@ -3975,6 +3987,10 @@ fn needsAA53_0( _S340 : vec2<f32>,  _S341 : f32) -> bool
     q_14.sampleH_0 = _S342.sampleH_0;
     q_14.reserved0_0 = _S342.reserved0_0;
     q_14.reserved1_0 = _S342.reserved1_0;
+    q_14.sourcePeak_0 = _S342.sourcePeak_0;
+    q_14.paperWhite_0 = _S342.paperWhite_0;
+    q_14.displayPeak_0 = _S342.displayPeak_0;
+    q_14.colorReserved_0 = _S342.colorReserved_0;
     q_14.reserved0_0 = 0.25f;
     var delta_2 : vec2<f32> = vec2<f32>(0.49000000953674316f) / vec2<f32>(_S342.sampleW_0, _S342.sampleH_0);
     var _S345 : vec2<f32> = _S340 - delta_2;

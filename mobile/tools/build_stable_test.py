@@ -63,6 +63,7 @@ def main():
             R / "tests/UiDesignInstrumentation.java",
             R / "tests/PhysicalInstrumentation.java",
             R / "tests/UiReviewInstrumentation.java",
+            R / "tests/HdrInstrumentation.java",
         ]
     )
     with zipfile.ZipFile(B / "classes.jar", "w") as archive:
@@ -90,7 +91,15 @@ def main():
         for p in dex.glob("*.dex"):
             archive.write(p, p.name)
         if args.physical_fixtures:
-            for name in ("source.mp4", "jitter.rgba", "map16.png", "stress.mov"):
+            for name in (
+                "source.mp4",
+                "jitter.rgba",
+                "map16.png",
+                "stress.mov",
+                "sdr10.mp4",
+                "hdr-pq.mp4",
+                "hdr-hlg.mp4",
+            ):
                 p = args.physical_fixtures / name
                 if p.is_file():
                     archive.write(

@@ -576,6 +576,10 @@ def grade_frame(frame, options, progress, ev=0.0, chroma=None):
 
 # 先完成分析，再原位应用稳定去闪与可选调色。
 def process_cache(cache, options, cancel=None, notify=lambda *_: None):
+    from precision_processing import is_precision, process_precision
+
+    if is_precision(cache):
+        return process_precision(cache, options, cancel, notify, process_cache)
     o = normalized_options(options)
     data = cache.data
     n, h, w, _ = data.shape
@@ -615,6 +619,8 @@ def process_cache(cache, options, cancel=None, notify=lambda *_: None):
         dict(frame=int(i), position=float(progress[i]))
         for i in np.unique(np.linspace(0, n - 1, min(n, 7)).round().astype(int))
     ]
+    if getattr(cache, "capture_precision_plan", False):
+        cache.precision_plan = plan, correction, chroma, progress
     target = np.memmap(cache.folder / "frames.rgba", mode="r+", dtype=np.uint8, shape=data.shape)
 
     # 对当前帧应用已经分析完成的变换与修正。

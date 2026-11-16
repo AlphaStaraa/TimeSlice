@@ -11,6 +11,7 @@ struct TFParams {
 #ifdef SHIREN_MAC42
  float shadowStrength,shadowWidth,shadowSoftness,shadowSide;
  float sampleW,sampleH,reserved0,reserved1;
+ float sourcePeak,paperWhite,displayPeak,colorReserved;
 #endif
 };
 struct Field {

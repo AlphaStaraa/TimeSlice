@@ -19,6 +19,7 @@ public final class SourceProcessor {
         public VideoSource.Cache cache;
         public double crop=1,validationP95=0,beforeFlicker=0,afterFlicker=0;
         public boolean nightToDay;public String algorithm="off";
+        public double[][] transforms,gains;
     }
     static final class Reference {
         Mat descriptors;Point[] points;double[] pose;
@@ -146,15 +147,17 @@ public final class SourceProcessor {
 
     /* 保持所有输入帧，准备可复用的稳定去闪缓存；首尾调色交给实时渲染。 */
     public static Result process(Context context,VideoSource.Cache base,SourceOptions options,AtomicBoolean stop,VideoSource.Progress progress)throws Exception{
+        if(base.precision)return processPrecision(context,base,options,stop,progress);
         Result result=new Result();boolean enabled=!options.stabilize.equals("off")||!options.deflicker.equals("off");
         VideoSource.Cache cache=enabled?VideoSource.allocate(context,base.w,base.h,base.frames):base;result.cache=cache;
+        result.transforms=new double[base.frames][9];result.gains=new double[base.frames][3];for(int i=0;i<base.frames;i++){result.transforms[i]=new double[]{1,0,0,0,1,0,0,0,1};Arrays.fill(result.gains[i],1);}
         try{
             double[][] poses=null;
             if(!options.stabilize.equals("off"))poses=registration(context,base,options.stabilize.equals("extreme"),stop,(p,t)->progress.update(p*.6f,t),result);
             if(poses!=null)result.crop=crop(poses,base.w,base.h);
             for(int i=0;enabled&&i<base.frames;i++){
                 ExportSafety.pace(context,stop);Mat input=rgba(base,i),output=rgba(cache,i);
-                try{if(poses==null)input.copyTo(output);else{double z=result.crop;double[] framing={z,0,(base.w-1)*.5*(1-z),0,z,(base.h-1)*.5*(1-z),0,0,1};Mat m=matrix(multiply(framing,poses[i]));Imgproc.warpAffine(input,output,m,new Size(base.w,base.h),Imgproc.INTER_LANCZOS4,Core.BORDER_REFLECT_101,new Scalar(0));m.release();}}
+                try{if(poses==null)input.copyTo(output);else{double z=result.crop;double[] framing={z,0,(base.w-1)*.5*(1-z),0,z,(base.h-1)*.5*(1-z),0,0,1};result.transforms[i]=multiply(framing,poses[i]);Mat m=matrix(result.transforms[i]);Imgproc.warpAffine(input,output,m,new Size(base.w,base.h),Imgproc.INTER_LANCZOS4,Core.BORDER_REFLECT_101,new Scalar(0));m.release();}}
                 finally{input.release();output.release();}
                 progress.update(.6f+.1f*(i+1)/base.frames,"稳定画面 "+(i+1)+"/"+base.frames);
             }
@@ -174,7 +177,7 @@ public final class SourceProcessor {
                 }
 
                 for(int i=0;i<cache.frames;i++){
-                    ExportSafety.pace(context,stop);double ev=Math.max(-limit,Math.min(limit,trend[i]-curve[i]));after[i]+=ev;
+                    ExportSafety.pace(context,stop);double ev=Math.max(-limit,Math.min(limit,trend[i]-curve[i]));after[i]+=ev;for(int c=0;c<3;c++)result.gains[i][c]=Math.pow(2,ev+chromaGain[i][c]);
                     byte[] values=new byte[256*4];for(int x=0;x<256;x++){for(int c=0;c<3;c++){double linear=LINEAR[x]*Math.pow(2,ev+chromaGain[i][c]);double srgb=linear<=.0031308?12.92*linear:1.055*Math.pow(linear,1/2.4)-.055;values[x*4+c]=(byte)Math.round(Math.max(0,Math.min(1,srgb))*255);}values[x*4+3]=(byte)x;}
                     Mat frame=rgba(cache,i),lut=new Mat(1,256,CvType.CV_8UC4);try{lut.put(0,0,values);Core.LUT(frame,lut,frame);}finally{frame.release();lut.release();}
                     progress.update(.8f+.2f*(i+1)/cache.frames,"去闪修正 "+(i+1)+"/"+cache.frames);
@@ -188,11 +191,34 @@ public final class SourceProcessor {
     /* 记录相邻帧曝光跳变的95分位值。 */
     static double jump95(double[] values){double[] jumps=new double[Math.max(1,values.length-1)];for(int i=1;i<values.length;i++)jumps[i-1]=Math.abs(values[i]-values[i-1]);Arrays.sort(jumps);return jumps[Math.min(jumps.length-1,(int)(jumps.length*.95))];}
 
+    /* SDR代理只负责运动和去闪计划；正式帧始终由RGB10原始缓存重采样。 */
+    static Result processPrecision(Context context,VideoSource.Cache base,SourceOptions options,AtomicBoolean stop,VideoSource.Progress progress)throws Exception{
+        double scale=Math.min(1,640./Math.max(base.w,base.h));int w=Math.max(2,(int)(base.w*scale)/2*2),h=Math.max(2,(int)(base.h*scale)/2*2);
+        VideoSource.Cache proxy=VideoSource.allocate(context,w,h,base.frames);Result measured=null;VideoSource.Cache output=null,processedProxy=null;
+        try{
+            float[] resize={(float)base.w/w,0,((float)base.w/w-1)/2,0,(float)base.h/h,((float)base.h/h-1)/2},unit={1,1,1};
+            for(int i=0;i<base.frames;i++){VideoSource.check(stop);if(!NativeCore.transformPrecision(base.frame(i),base.w,base.h,proxy.frame(i),w,h,resize,unit,base.colorFlags,base.sourcePeak,false))throw new Exception("高精度分析代理失败");}
+            measured=process(context,proxy,options,stop,progress);processedProxy=measured.cache;boolean enabled=!options.stabilize.equals("off")||!options.deflicker.equals("off");
+            output=enabled?VideoSource.allocate(context,base.w,base.h,base.frames):base;VideoColor.copy(base,output);output.brightness=measured.cache.brightness;output.chroma=measured.cache.chroma;output.grade=measured.cache.grade;
+            double sx=base.w/(double)w,sy=base.h/(double)h;double[] expand={sx,0,(sx-1)/2,0,sy,(sy-1)/2,0,0,1},contract=inverse(expand);
+            if(enabled)for(int i=0;i<base.frames;i++){
+                VideoSource.check(stop);double[] inv=inverse(multiply(multiply(expand,measured.transforms[i]),contract));float[] m={(float)inv[0],(float)inv[1],(float)inv[2],(float)inv[3],(float)inv[4],(float)inv[5]},g={(float)measured.gains[i][0],(float)measured.gains[i][1],(float)measured.gains[i][2]};
+                if(!NativeCore.transformPrecision(base.frame(i),base.w,base.h,output.frame(i),base.w,base.h,m,g,base.colorFlags,base.sourcePeak,true))throw new Exception("高精度稳定/去闪写入失败");
+            }
+            measured.cache=output;return measured;
+        }catch(Exception error){if(output!=null&&output!=base)output.close();throw error;}
+        finally{if(processedProxy!=null&&processedProxy!=proxy)processedProxy.close();proxy.close();}
+    }
+
     /* 从正式缓存生成轻量预览，不重新去闪或稳定。 */
     public static VideoSource.Cache preview(Context context,VideoSource.Cache full,int edge)throws Exception{
         double scale=Math.min(1,edge/(double)Math.max(full.w,full.h));int w=Math.max(2,(int)(full.w*scale)/2*2),h=Math.max(2,(int)(full.h*scale)/2*2);
         VideoSource.Cache out=VideoSource.allocate(context,w,h,full.frames);out.brightness=full.brightness;out.grade=full.grade;
-        for(int i=0;i<full.frames;i++){Mat source=rgba(full,i),dest=rgba(out,i);try{Imgproc.resize(source,dest,new Size(w,h),0,0,Imgproc.INTER_AREA);}finally{source.release();dest.release();}}
+        VideoColor.copy(full,out);
+        for(int i=0;i<full.frames;i++){
+            if(full.precision){float sx=full.w/(float)w,sy=full.h/(float)h;if(!NativeCore.transformPrecision(full.frame(i),full.w,full.h,out.frame(i),w,h,new float[]{sx,0,(sx-1)/2,0,sy,(sy-1)/2},new float[]{1,1,1},full.colorFlags,full.sourcePeak,true))throw new Exception("高精度预览生成失败");}
+            else{Mat source=rgba(full,i),dest=rgba(out,i);try{Imgproc.resize(source,dest,new Size(w,h),0,0,Imgproc.INTER_AREA);}finally{source.release();dest.release();}}
+        }
         return out;
     }
 }

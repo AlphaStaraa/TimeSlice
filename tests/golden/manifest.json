@@ -51,7 +51,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "5b596f8f1deb826ec2cb689f4ffc9a7de7b81aaec7d688db4bad54db2691aa41"
     },
@@ -100,7 +101,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "c813f7719582b99deb901eb8561bd878bec55a2c3e801df18aea57e3e1dbc107"
     },
@@ -149,7 +151,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "e8feca2c80611c3365953acba9b0ceeedf8679a593226a67426dc8fa87b859fb"
     },
@@ -198,7 +201,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "28d03aebb6e28193ae35cea202704f07c0862eeef5910ede36419c98a57c2331"
     },
@@ -247,7 +251,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "a603944295e37b30e8275ae393239472c7cd3c490b2d53b86db9724d5d112a5e"
     },
@@ -296,7 +301,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "f501f4e3fae5b158860da1d71acc0a6bd10aba30360ff740aa41c6870063e326"
     },
@@ -345,7 +351,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "854aa04074f79b0f27d638af8e8ce8813a367fc0c9e39513f06e902357acf5ef"
     },
@@ -394,7 +401,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "17bd101683ab2c82bb8b1aadb590426e3717778d6a4fd30072a44449d0d9c157"
     },
@@ -444,7 +452,8 @@
         "rotationStartAngle": 0.0,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d079447ce09ef0a5f338cfe70bfa6d46237c76b19417a231c7a1f73e7f4d8171"
     },
@@ -494,7 +503,8 @@
         "rotationStartAngle": 0.0,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "6c936421647d9168a58e8feecf4c710c02ad9a7ee03df739c2419437312546f6"
     },
@@ -543,7 +553,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "af9767c9f1003de7b4bb4255ae0d23779dfff4efdbb862bc8eea911e95d9b7b9"
     },
@@ -592,7 +603,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "e4e51477ce654e7983f9ed32855c778d658895aca496e853eb44193d58965791"
     },
@@ -641,7 +653,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "c4926fc51113da2be4bbc7a16d9f23c8c7ff5a6040bebb0b6984f801c6d7e799"
     },
@@ -690,7 +703,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "dc98354b587c91a912b74a693825b066f732b4d2277b760e4d263f8b5b9199eb"
     },
@@ -739,7 +753,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "b085ed2363a4bcec00aa0287553c34afeccc757a7ebf0688ef489c5f680aa64c"
     },
@@ -788,7 +803,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "08fb8cfbc34c2933d26e69a17cba10aa3b114f49a2ce118a97a120a8f9b1c2af"
     },
@@ -837,7 +853,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "582db5f8ae83f0c3561ccb7e62fbce01bb206b5dc3c3060a5b4113d27d5099b3"
     },
@@ -886,7 +903,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "4ca452e7851f5367de10d07ad29c48ad6777a8caf1cc2bf6309f9869ce9bdbcd"
     },
@@ -935,7 +953,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "cad4d4d170bd11280cdc953e55cfb14c8d1d416b72d0bbb37008eaafce0b138c"
     },
@@ -984,7 +1003,8 @@
         "discardRatio": 0.6,
         "recommendedSlices": 60,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "ff71557c93b33e6b24d59ef89a61f8542ab13d39da6ecf22bc5619602890b916"
     },
@@ -1032,7 +1052,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "2667e8772baddb17fb6d3e945da717c06c4d42aa7140c1e81b89f46c772f2235"
     },
@@ -1080,7 +1101,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "7a52658d19814a1b080d60aceb20528674899ae6aaabecd9d093f071dd59bfdd"
     },
@@ -1128,7 +1150,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "9be83c0579b60219796433d2cb1e9e6992557c3a07e03e3ad1b3bd50f6ae5e65"
     },
@@ -1176,7 +1199,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d22506f2e06af6551b7c64f1d59ced48176302663cc82afebaf37624e293a65c"
     },
@@ -1224,7 +1248,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "11f77b49134cf842e678c1cda888f003a436c96cc1713b82044b3158b821a690"
     },
@@ -1272,7 +1297,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d559685d087e788632cbeeb0e1fb02e07641426d5c14ccb866f45ede28a7e064"
     },
@@ -1320,7 +1346,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "2c5cd1f17644892558a05cd230c369cffee2407cc877cea157f99ecbfa2cc1a8"
     },
@@ -1368,7 +1395,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "4980e8e3c8de907a7105717a9da65247037cd214bdcbe3477fbc7f12ed52b7ce"
     },
@@ -1416,7 +1444,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "e10727b60ad3b913f1ef0c86bff688842b2487992366f428025828f895c1bd3f"
     },
@@ -1464,7 +1493,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "1802a1a8b9499c5b122114f05c1bf885f2424d4121d0778f3269626763fd28ff"
     },
@@ -1512,7 +1542,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "a6b4c32eaae05a70a4b0ad7b6c2d1c968efbaf77866d8d23d2dd981f807cc00f"
     },
@@ -1560,7 +1591,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "243ca392ed936853b95a344837184cd467e5226ee03ae86dd662600597a3be93"
     },
@@ -1609,7 +1641,8 @@
         "discardRatio": 0.6,
         "rotationStartAngle": 0.0,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "3a15d9a456dd53969cfb2f36e0609547ccada13985e9bd5d0adee374e05a9a87"
     },
@@ -1658,7 +1691,8 @@
         "discardRatio": 0.6,
         "rotationStartAngle": 0.0,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "2ad476f4ca1a4dd403840f5852c656a394fdf00acf2ed79f0c4d894012f841a6"
     },
@@ -1706,7 +1740,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "381c736efe9a89bb1d476b41ed0f0bf21f1dbf2fd8e82c379491f979f28c27d0"
     },
@@ -1754,7 +1789,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "84f663f9dbac9463564752bae193c416d6515950af265544b97a5f3a74ad6fa9"
     },
@@ -1802,7 +1838,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "9c950e277378c7f0ae36fea57ac037b3ba7f3bef86c514dbebb3d9b18a08fac9"
     },
@@ -1850,7 +1887,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "ab3ccaa4622f29637299d86ca82c2eee48e10f918bf7cb36e13ef416cab6393d"
     },
@@ -1898,7 +1936,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "63af5ddc12c8f74d00c3eaee9fb90c682976e19ba46bfab9a84665d798d59862"
     },
@@ -1946,7 +1985,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "9b45551655f76783c0c4bfd913565851a240d53d14b5fcdd294c4efc8b8b13fc"
     },
@@ -1994,7 +2034,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "e66b080ad1db226d8031b7f31e2dfdcc51fdfeea8d97852f8088888e4274683c"
     },
@@ -2042,7 +2083,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "c74bd0eb5881dd939cb14428fce2187136973176b6c2b7fafec5334f945810c3"
     },
@@ -2090,7 +2132,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "5a8ed6cc17a9c13e513a7f8e1264a4b53a8dcd1c960d2c6dae5c3363c9102799"
     },
@@ -2138,7 +2181,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "bc449d058df2fc0f0834fd7ceb1c6866cf0ae4236ad6d26770cc909e9f87c824"
     },
@@ -2186,7 +2230,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "0624611048ec6bd13e8b222c03e0169ceb35b2d860aa9c20250e036382d63c83"
     },
@@ -2234,7 +2279,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "5f0df504b76e0c850e8a5f2ab010d6466ffe9ea13d1af426abac32e7cddf033a"
     },
@@ -2282,7 +2328,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "a27c46d9049067b98d46155f39b6fe55f39d2f3bfd55aadbfcfca20ef2ab226f"
     },
@@ -2330,7 +2377,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d6fcd8ab6396cb80b392d97f64f58cc1fda91d2ee1429fae3e15788f8dbe0149"
     },
@@ -2378,7 +2426,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "099163dc00f18f37e9db1322d2a891a6dafab8ea82514bc247ebc399c08f623c"
     },
@@ -2426,7 +2475,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "1b14b00b134636f0a1c71d978f2573bc82be739c1c5200c80a00e2c6074ba87c"
     },
@@ -2474,7 +2524,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "0be30b883060692bc32ed855cf12a2199b68ff85359a0aeee70eb311ace6205b"
     },
@@ -2522,7 +2573,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "44f4d87ae83ff776a68278c5e658f65f7414a14deebfd72ad74264885570943e"
     },
@@ -2570,7 +2622,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "7c77d99a669456a4ee5b2b344bfdbc692d9d589f0b9b6991b41a1973feab7984"
     },
@@ -2618,7 +2671,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d5d6d2911bfaaa2b790f4abcf1cc2f2594b14b7e90ac97f12ce06f9ce89d3ce9"
     },
@@ -2666,7 +2720,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "de124cdfbe3e607d0b6c0593c359ec870ec1c74aa5e8c5bca6efe4420aaacd54"
     },
@@ -2714,7 +2769,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "1742d6912d3f02f3f7183fcc5ab5855c060de82144f2c75af040c40c9d9863c0"
     },
@@ -2762,7 +2818,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "3658091f9343c7c505c15b958ef33bab2b095a77017f4bc85f3a7aa03184ac7d"
     },
@@ -2810,7 +2867,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "dbb2512fa647a0005e1afb8094d1f3eb574a603084c16231c2f7c65a984205f8"
     },
@@ -2858,7 +2916,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "27bd3644667df28e550a34ac9fb9e5144548c18da6483ebd8516402504f46641"
     },
@@ -2906,7 +2965,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "640b2c55d90987467908f2f91376ae285dfd29fb1cdc23116250a587bfda177a"
     },
@@ -2954,7 +3014,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "da943acb9d2eaf4d94bdaca51539281351782f787ea21dfa06e431a3fcb453b6"
     },
@@ -3002,7 +3063,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "044c6146a01303609cde308f33976ca3972b636885fd5b35d4c7c4b3dffad742"
     },
@@ -3050,7 +3112,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "1e313ff05417f2cc14d4b0fc35491189def0c97244ecf534d6f4a0520264d088"
     },
@@ -3098,7 +3161,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "11f5c92db51eef007509da8690621857685cc0c7312a2550de9d47618e3eecce"
     },
@@ -3146,7 +3210,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "7a680fb2885af6e80bdcb5e2a9c45cbcceaad0d01cd82a0ffe3fdbf02cc2917c"
     },
@@ -3194,7 +3259,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "91c358eab2e6c84e591de37c99f29fa4f47433380e8d71ce8d5131db35a3888e"
     },
@@ -3242,7 +3308,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "1b59c1ebca228a771b7b5592cf0a9ef6cf232f5bdc95e611990109dae47c5ee8"
     },
@@ -3290,7 +3357,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "39de687495f05ea1a500918040912ebd91a93e991a6bf0f2808f879c289b1e18"
     },
@@ -3338,7 +3406,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "4e0372ee0a868c108a8f4408188521860f73055f77fd2dd79d03ebb51d989c70"
     },
@@ -3386,7 +3455,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "d4adfd1089710f6a7e3a6b5f918757baf02a2f61f23548197c6a0374a3786bd3"
     },
@@ -3434,7 +3504,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "8a95b1638f2f9b873e8a3d7ff0ea2111ced05612b010b6bea71ea00a5f61bd73"
     },
@@ -3482,7 +3553,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "17f257f765128c648eefa1b38276e1d5febc355f44e281716bc488956d2e40e8"
     },
@@ -3530,7 +3602,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "c0b8869dbac3792eb99b813d48892080f67e3533a7492d8dbdb066d6c2f89d1c"
     },
@@ -3578,7 +3651,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "a1f2ce486efe1ee5eb5600df5cfa15bd05a88a3314e162805e38f6464699a927"
     },
@@ -3626,7 +3700,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "b78a0c6ca9b7c6a72485416daf07be93247359f943e9dad7c3b76ddbc1e7d7d3"
     },
@@ -3674,7 +3749,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "b99c5c0118769754e8250d36c3cae6b61fec72e382b2acb6135afba12180d5bf"
     },
@@ -3722,7 +3798,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "ac269e0521170d9d908ab4e3316cc321396dc532532e064c1f81d3e9d75fac50"
     },
@@ -3770,7 +3847,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "700b08f1747dcef77f4a9b677dd0c61e620cd269e56c1a4b2eddc2e39f0b8741"
     },
@@ -3818,7 +3896,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "5c9f05515d5e039c26dc573e8c5c83eef8b48917889858155a2dc10c64cfad40"
     },
@@ -3866,7 +3945,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "3b4de58071a24a11d79470ade2a1b521ab0a71db23b71110759e8ead5e00cb77"
     },
@@ -3914,7 +3994,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "9091f052f90002f9159158d0ab62da3f018bf708a88e818502baba09eb94b618"
     },
@@ -3962,7 +4043,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "5066418667e087d7bb7168b4aabb1d89b544dcb36d81fa5e38631e091a33d6fd"
     },
@@ -4010,7 +4092,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "4aac2f1465e23466c522c6842150c5cadae37448cf8c916d6b93b27cb9e0b277"
     },
@@ -4058,7 +4141,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "089216a862ec3d11ec77384bdbf29a290c9a77365186f58b106d7f745a8dc922"
     },
@@ -4106,7 +4190,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "0efb1910d17888db9e2ef58c5d5bb889408d702f41e0937c52fc6d184e7484d9"
     },
@@ -4154,7 +4239,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "081bc9e6a884789f2f073be5d1d91615b828f660faad11a321576a4fdf43b1f5"
     },
@@ -4202,7 +4288,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "45aa7760aa21a2922adbdd6e68e339642dfce1d9486ca143537865b214d21f2f"
     },
@@ -4250,7 +4337,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "f8a91ced3d22109c3f9f2e8633fbca628c84bad203afdce4a21cba99379d5c56"
     },
@@ -4298,7 +4386,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "89da0ebda18a7bb9bc09d22a35df5d169b14a632f31f189305ee21a8b12e11ba"
     },
@@ -4346,7 +4435,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "0df8b36716cfabd4940fce80b92798a9445ff695bd896770f3a91740998ba337"
     },
@@ -4394,7 +4484,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "b1883822b98fea0e145ca95bef2e6e9f8f320847caf3922232be26b687e4936d"
     },
@@ -4442,7 +4533,8 @@
         "dayNightSplit": false,
         "discardRatio": 0.6,
         "bitrateMbps": 0,
-        "gradientDither": true
+        "gradientDither": true,
+        "exportFormat": "h264"
       },
       "sha256": "8a0278ee92f9b650da829de6f44b270d564f747e358e0d430fbed8b8cfd75f82"
     }

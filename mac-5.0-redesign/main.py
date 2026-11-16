@@ -24,6 +24,9 @@ def main():
     parser.add_argument("--self-check", type=Path)
     parser.add_argument("--self-check-source", type=Path)
     parser.add_argument("--require-gpu", action="store_true")
+    parser.add_argument(
+        "--self-check-format", choices=("h264", "hevc10", "hdr_pq", "hdr_hlg"), default="h264"
+    )
     options, _ = parser.parse_known_args()
     if options.self_check and (
         not options.self_check_source or not options.self_check_source.is_file()
@@ -86,6 +89,7 @@ def main():
             options.self_check_source.resolve(),
             options.require_gpu,
             warnings,
+            options.self_check_format,
         )
     result = app.exec()
     import shiboken6

@@ -14,8 +14,12 @@
 [[vk::binding(6,0)]] StructuredBuffer<float> gradeData;
 #define GRADE(i) gradeData[int(i)]
 #include "grade.h"
+#include "color_management.h"
+#include "grade_precision.h"
 #undef GRADE
 #include "antialias.h"
+/* 在空间插值前解码源传递函数，避免HDR插值先降到8位或代码值域。 */
+float4 unpackSource106(uint v){Color53 c=inputColor106(rawColor106(v,param),param);return float4(c.r,c.g,c.b,1);}
 /* 读取源帧并应用可选的空间缩放与实时调色。 */ float4 sourceFrame53(uint frame,uint pixel,TFParams p){
  float4 c;
  if((p.flags&64)!=0){
@@ -24,9 +28,9 @@
   uint2 lo=uint2(floor(point)),hi=min(lo+1,uint2(cfg[10]-1,cfg[11]-1));float2 t=frac(point);
   uint base=frame*cfg[14]*cfg[15];
   uint xa=lo.x-cfg[12],xb=hi.x-cfg[12],ya=lo.y-cfg[13],yb=hi.y-cfg[13];
-  c=lerp(lerp(unpack(source[base+ya*cfg[14]+xa]),unpack(source[base+ya*cfg[14]+xb]),t.x),lerp(unpack(source[base+yb*cfg[14]+xa]),unpack(source[base+yb*cfg[14]+xb]),t.x),t.y);
- }else c=unpack(source[frame*cfg[2]*cfg[3]+pixel]);
- if((p.flags&128)!=0){Color53 rgb=grade53(color53(c.r,c.g,c.b),int(frame));c=float4(rgb.r,rgb.g,rgb.b,1);}
+  c=lerp(lerp(unpackSource106(source[base+ya*cfg[14]+xa]),unpackSource106(source[base+ya*cfg[14]+xb]),t.x),lerp(unpackSource106(source[base+yb*cfg[14]+xa]),unpackSource106(source[base+yb*cfg[14]+xb]),t.x),t.y);
+ }else c=unpackSource106(source[frame*cfg[2]*cfg[3]+pixel]);
+ if((p.flags&128)!=0){Color53 rgb=linearColor106(p)?gradeLinear106(color53(c.r,c.g,c.b),int(frame),p):grade53(color53(c.r,c.g,c.b),int(frame));c=float4(rgb.r,rgb.g,rgb.b,1);}
  return c;
 }
 #endif
@@ -110,8 +114,11 @@
  else if(p.viewMode==2){float n=adjusted3(lerp(clamp(f.a,0.f,1.f),clamp(f.b,0.f,1.f),clamp(f.weight,0.f,1.f)),p);color=float4(n,n,n,1);}
  else {float4 a=sampleSource(f.a,local,p),b=sampleSource(f.b,local,p);b.rgb*=f.shade;color=float4(lerp(a.rgb,b.rgb,clamp(f.weight,0.f,1.f)),1);}
 #endif
- if((p.flags&4096u)!=0){float noise=gradientOffset105(id.x+cfg[0],id.y+cfg[1])/255.f;color.rgb=clamp(color.rgb,0.f,1.f)+noise;}
+#ifdef SHIREN_MAC_NEXT
+ output[(id.z*cfg[3]+id.y)*cfg[2]+id.x]=packColor106(color53(color.r,color.g,color.b),id.x+cfg[0],id.y+cfg[1],p);
+#else
  output[(id.z*cfg[3]+id.y)*cfg[2]+id.x]=pack(color);
+#endif
 }
 // Diagnostic field, used for CPU/GPU equivalence and warped fold sampling.
 [[vk::binding(5,0)]] RWStructuredBuffer<float4> diagnostics;

@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from quality_ui import check_bitrate_controls
+from quality_ui import check_bitrate_controls, check_format_controls
 
 
 def main():
@@ -137,6 +137,7 @@ def main():
         output.mkdir(exist_ok=True)
         studio.setOutput(str(output))
         check_bitrate_controls(window, studio, qt, app, 1)
+        check_format_controls(window, studio, qt, app, 1)
         studio.setActive(2)
         reused = []
         for _ in range(2):

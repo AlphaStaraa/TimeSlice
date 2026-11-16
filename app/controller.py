@@ -44,6 +44,7 @@ class Controller(PreviewController):
                         "encoder",
                         "bitrateMbps",
                         "gradientDither",
+                        "exportFormat",
                     ]
                 }
             )

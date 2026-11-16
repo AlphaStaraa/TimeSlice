@@ -6,6 +6,7 @@ from copy import deepcopy
 import numpy as np
 from export_pipeline import StreamingExport
 from mac_controller import MacRenderJob
+from precision_processing import analysis_pixels
 from prepared_source import reopen, source_key
 from render import RenderJob
 from source_processing import (
@@ -71,13 +72,15 @@ class ProcessedRenderJob(StreamingExport, MacRenderJob):
             cache.live_grade = None
             if self.source_options["grade"]:
                 if self.source_options["dayNight"] == "auto":
-                    analysis = report.get("dayNight") or analyze_direction(cache.data)
+                    analysis = report.get("dayNight") or analyze_direction(
+                        analysis_pixels(cache, self.cancel)
+                    )
                     report["dayNight"] = analysis
                     if analysis["ambiguous"]:
                         raise ValueError("日夜变化不明显，请先手动选择日转夜或夜转日。")
                 curve = report.get("colorProgress")
                 if curve is None:
-                    curve = source_color_curve(cache.data)
+                    curve = source_color_curve(analysis_pixels(cache, self.cancel))
                     report["colorProgress"] = curve.tolist()
                 cache.live_grade = grade_config(self.source_options, np.asarray(curve, np.float32))
             if decoded_session:

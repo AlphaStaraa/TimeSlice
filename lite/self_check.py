@@ -1,6 +1,7 @@
 """打包应用的显式命令行验收，运行真实界面、目录流程和视频输出。"""
 
 import json
+import sys
 import time
 import traceback
 from pathlib import Path
@@ -10,16 +11,19 @@ from PySide6.QtCore import QMetaObject, QObject, QTimer, Slot
 
 
 class PackageCheck(QObject):
-    def __init__(self, app, studio, engine, output, require_gpu=False):
+    def __init__(self, app, studio, engine, output, require_gpu=False, output_format="h264"):
         """仅显式自测时创建，使用独立偏好、缓存及输出。"""
         super().__init__()
         self.app, self.studio, self.engine = app, studio, engine
         self.output, self.require_gpu = Path(output), require_gpu
+        self.output_format = output_format
         self.window = engine.rootObjects()[0]
         self.phase = 0
         self.started = time.monotonic()
         self.warnings = []
-        self.report = dict(packaged=True, requireGpu=require_gpu, ffmpeg=ffmpeg())
+        self.report = dict(
+            packaged=bool(getattr(sys, "frozen", False)), requireGpu=require_gpu, ffmpeg=ffmpeg()
+        )
         self.engine.warnings.connect(lambda items: self.warnings.extend(str(x) for x in items))
         self.timer = QTimer(self)
         self.timer.setInterval(50)
@@ -49,7 +53,11 @@ class PackageCheck(QObject):
                 studio.setSetting("rotationStartAngle", 90)
                 studio.setFreezeSplit(True)
                 for key, value in dict(
-                    duration=0.5, fps=12, longEdge=160, engine="gpu" if self.require_gpu else "auto"
+                    duration=0.5,
+                    fps=12,
+                    longEdge=160,
+                    engine="gpu" if self.require_gpu else "auto",
+                    exportFormat=self.output_format,
                 ).items():
                     studio.setSetting(key, value)
                 folder = self.output / "exports"
@@ -73,7 +81,12 @@ class PackageCheck(QObject):
                     bool(line) and not line.startswith("#") for line in decoded.stdout.splitlines()
                 )
                 assert count == 6, count
+                if self.output_format != "h264":
+                    assert record["verifiedColor"]["lumaBits"] == 10
+                    assert record["sourceCache"]["pixelFormat"] == "x2rgb10le"
                 self.report.update(
+                    outputFormat=self.output_format,
+                    verifiedColor=record.get("verifiedColor"),
                     engine=record["engine"],
                     encoder=record["encoder"],
                     decodedFrames=count,

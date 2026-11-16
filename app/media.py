@@ -9,8 +9,10 @@ from pathlib import Path
 
 import numpy as np
 from export_quality import target_bitrate
+from hevc_stream import sequence_info
 from model import ROOT, dimensions
 from PIL import Image
+from video_color import output_spec, source_color
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
@@ -92,10 +94,41 @@ def probe(path):
         raise ValueError("视频没有有效时长。")
     first = videos[0] if videos else ""
     hdr = "smpte2084" in first or "arib-std-b67" in first
-    if hdr:
-        raise ValueError(
-            "当前版本处理 SDR 视频。这个素材是 HDR，请先导出为 Rec.709 SDR，避免亮度和颜色改变。"
-        )
+    pix = re.search(r"\b(?:yuv\w+|p010le|p016le|gbrp\w+|rgb48\w*|nv12)\b", first)
+    pixel_format = pix[0] if pix else "yuv420p"
+    depth = re.search(r"p(10|12|16)(?:le|be)", pixel_format)
+    bits = (
+        int(depth[1])
+        if depth
+        else 10
+        if pixel_format == "p010le"
+        else 16
+        if "48" in pixel_format
+        else 8
+    )
+    color = dict(
+        transfer="smpte2084"
+        if "smpte2084" in first
+        else "arib-std-b67"
+        if "arib-std-b67" in first
+        else "iec61966-2-1"
+        if "iec61966-2-1" in first
+        else "bt709",
+        primaries="bt2020" if "bt2020" in first else "bt709",
+        matrix="bt2020nc" if "bt2020" in first else "bt709",
+        range="pc" if "(pc" in first or ", pc" in first else "tv",
+        bits=bits,
+        hdr=hdr,
+        peakNits=1000 if hdr else 203,
+    )
+    descriptor = re.search(r"\((?:tv|pc),\s*([^,)]+)", first)
+    tagged = descriptor[1].strip() if descriptor else "unknown"
+    values = tagged.split("/")
+    color["tagsPresent"] = "unknown" not in values and tagged != "unspecified"
+    if len(values) == 3:
+        color["matrix"] = values[0] if values[0] != "unknown" else "bt709"
+        color["primaries"] = values[1] if values[1] != "unknown" else "bt709"
+        color["transfer"] = values[2] if values[2] != "unknown" else "bt709"
     return dict(
         path=str(Path(path).resolve()),
         name=Path(path).name,
@@ -105,6 +138,7 @@ def probe(path):
         fps=float(fps[1]) if fps else 30,
         audio="Audio:" in s,
         hdr=hdr,
+        color=color,
     )
 
 
@@ -136,7 +170,7 @@ class FrameCache:
 
     # 建立缓存或底层资源，成功后才向调用方公开完整结果。
     @classmethod
-    def create(cls, info, edge, fps, folder, cancel=None, progress=None):
+    def create(cls, info, edge, fps, folder, cancel=None, progress=None, precision=False):
         folder = Path(folder)
         folder.mkdir(parents=True, exist_ok=True)
         w, h = dimensions(info, edge)
@@ -150,6 +184,14 @@ class FrameCache:
         target = folder / "frames.rgba"
         partial = folder / "frames.partial"
         log = folder / "decode.log"
+        color = source_color(info)
+        high = bool(precision or color["hdr"])
+        pixel_format = "x2rgb10le" if high else "rgba"
+        filters = f"fps={fps:.8f},scale={w}:{h}:flags=lanczos"
+        if high:
+            filters = filters.replace("flags=lanczos", "flags=lanczos+accurate_rnd+full_chroma_int")
+            matrix = "bt2020" if color["matrix"].startswith("bt2020") else "bt709"
+            filters += f":in_color_matrix={matrix}:in_range={color['range']}:out_range=pc"
         args = [
             ffmpeg(),
             "-hide_banner",
@@ -162,9 +204,9 @@ class FrameCache:
             "0:v:0",
             "-an",
             "-vf",
-            f"fps={fps:.8f},scale={w}:{h}:flags=lanczos",
+            filters,
             "-pix_fmt",
-            "rgba",
+            pixel_format,
             "-threads",
             "4",
             "-f",
@@ -194,6 +236,38 @@ class FrameCache:
                 if frames < 2 or size % (w * h * 4):
                     raise ValueError("解码的视频帧不完整。")
                 partial.replace(target)
+                if high and color["hdr"]:
+                    packed = np.memmap(target, mode="r", dtype="<u4")
+                    maximum = 0
+                    try:
+                        for position in range(0, len(packed), 2_000_000):
+                            check(cancel)
+                            block = packed[position : position + 2_000_000]
+                            maximum = max(
+                                maximum,
+                                int(((block >> 20) & 1023).max()),
+                                int(((block >> 10) & 1023).max()),
+                                int((block & 1023).max()),
+                            )
+                    finally:
+                        packed._mmap.close()
+                    if color["transfer"] == "smpte2084":
+                        from precision_pixels import pq_decode
+
+                        observed = float(pq_decode(np.array(maximum / 1023)))
+                    else:
+                        value = maximum / 1023
+                        scene = (
+                            value * value / 3
+                            if value <= 0.5
+                            else (math.exp((value - 0.55991073) / 0.17883277) + 0.28466892) / 12
+                        )
+                        observed = 1000 * scene**1.2
+                    color = dict(
+                        color,
+                        peakNits=max(color["peakNits"], min(10000, observed)),
+                        observedPeakNits=observed,
+                    )
                 meta = dict(
                     width=w,
                     height=h,
@@ -201,6 +275,8 @@ class FrameCache:
                     duration=info["duration"],
                     frames=frames,
                     source=info["path"],
+                    pixelFormat=pixel_format,
+                    color=color,
                 )
                 (folder / "cache.json").write_text(
                     json.dumps(meta, ensure_ascii=False), encoding="utf8"
@@ -213,6 +289,10 @@ class FrameCache:
 
     # 关闭当前对象持有的资源，避免重复占用文件、线程或设备。
     def close(self):
+        proxy = getattr(self, "analysis_proxy", None)
+        if proxy is not None:
+            proxy.close()
+            self.analysis_proxy = None
         if getattr(self, "data", None) is not None:
             self.data._mmap.close()
             self.data = None
@@ -251,53 +331,126 @@ ENCODERS = {
     "h264_qsv": ["-c:v", "h264_qsv"],
     "h264_amf": ["-c:v", "h264_amf", "-quality", "quality"],
     "libx264": ["-c:v", "libx264", "-preset", "medium"],
+    "hevc_videotoolbox": ["-c:v", "hevc_videotoolbox", "-profile:v", "main10"],
+    "hevc_videotoolbox_sw": [
+        "-c:v",
+        "hevc_videotoolbox",
+        "-profile:v",
+        "main10",
+        "-require_sw",
+        "1",
+    ],
+    "hevc_nvenc": ["-c:v", "hevc_nvenc", "-profile:v", "main10", "-rc", "vbr"],
+    "hevc_qsv": ["-c:v", "hevc_qsv", "-profile:v", "main10"],
+    "hevc_amf": ["-c:v", "hevc_amf", "-profile:v", "main10", "-quality", "quality"],
+    "libx265": [
+        "-c:v",
+        "libx265",
+        "-profile:v",
+        "main10",
+        "-preset",
+        "medium",
+        "-x265-params",
+        "log-level=error:pools=2:frame-threads=2",
+    ],
 }
 _encoder_cache = {}
 
 
 # 探测硬件编码器并在不可用时回退到软件编码。
-def choose_encoder(mode="auto"):
-    if mode == "cpu":
+def choose_encoder(mode="auto", output_format="h264"):
+    """以真实编码和SPS确认Main10能力，无法满足格式时禁止退成8位。"""
+    spec = output_spec(output_format)
+    high = spec["bits"] == 10
+    if mode == "cpu" and not high:
         return "libx264"
-    if mode in _encoder_cache:
-        return _encoder_cache[mode]
-    candidates = (
-        ["h264_videotoolbox"]
-        if sys.platform == "darwin"
-        else ["h264_nvenc", "h264_qsv", "h264_amf"]
-    )
-    for name in candidates:
-        r = run(
-            [
-                ffmpeg(),
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-f",
-                "lavfi",
-                "-i",
-                "color=s=128x128:r=30:d=0.1",
-                "-frames:v",
-                "1",
-                *ENCODERS[name],
-                "-f",
-                "null",
-                "-",
-            ],
-            capture_output=True,
-            timeout=20,
+    key = (mode, high)
+    if key in _encoder_cache:
+        return _encoder_cache[key]
+    if high:
+        if mode == "cpu":
+            candidates = (
+                ["hevc_videotoolbox_sw", "libx265"] if sys.platform == "darwin" else ["libx265"]
+            )
+        else:
+            candidates = (
+                ["hevc_videotoolbox", "hevc_videotoolbox_sw", "libx265"]
+                if sys.platform == "darwin"
+                else ["hevc_nvenc", "hevc_qsv", "hevc_amf", "libx265"]
+            )
+    else:
+        candidates = (
+            ["h264_videotoolbox"]
+            if sys.platform == "darwin"
+            else ["h264_nvenc", "h264_qsv", "h264_amf"]
         )
-        if r.returncode == 0:
-            _encoder_cache[mode] = name
+    for name in candidates:
+        pixel = "yuv420p10le" if name == "libx265" else "p010le"
+        options = ["-vf", "format=" + pixel] if high else []
+        try:
+            result = run(
+                [
+                    ffmpeg(),
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "color=s=128x128:r=30:d=0.1",
+                    "-frames:v",
+                    "1",
+                    *options,
+                    *ENCODERS[name],
+                    *(["-movflags", "frag_keyframe+empty_moov"] if high else []),
+                    "-f",
+                    "mp4" if high else "null",
+                    "-",
+                ],
+                capture_output=True,
+                timeout=30,
+            )
+            if result.returncode:
+                continue
+            if high:
+                actual = sequence_info(result.stdout)
+                if actual["lumaBits"] != 10 or actual["chromaBits"] != 10:
+                    continue
+            _encoder_cache[key] = name
             return name
-    _encoder_cache[mode] = "libx264"
+        except (ValueError, subprocess.TimeoutExpired):
+            continue
+    if high:
+        raise ValueError(
+            "当前设备或编码方式无法输出真正的HEVC Main10。请改选其他编码方式或H.264兼容格式。"
+        )
+    _encoder_cache[key] = "libx264"
     return "libx264"
 
 
 # 组合原始帧输入、音频映射、编码质量和封装参数。
 def encode_args(
-    w, h, fps, duration, output, encoder, info, audio, input_path="pipe:0", bitrate_mbps=0
+    w,
+    h,
+    fps,
+    duration,
+    output,
+    encoder,
+    info,
+    audio,
+    input_path="pipe:0",
+    bitrate_mbps=0,
+    output_format="h264",
 ):
+    spec = output_spec(output_format)
+    high = spec["bits"] == 10
+    if high != (encoder.startswith("hevc_") or encoder == "libx265"):
+        raise ValueError("编码器与所选输出格式不一致，已停止导出以避免位深降级")
+    input_pixel = "x2rgb10le" if high else "rgba"
+    output_pixel = (
+        "yuv420p10le" if high and encoder == "libx265" else "p010le" if high else "yuv420p"
+    )
+    matrix = spec["matrix"]
     bits = target_bitrate(w, h, fps, bitrate_mbps)
     args = [
         ffmpeg(),
@@ -308,13 +461,24 @@ def encode_args(
         "-f",
         "rawvideo",
         "-pix_fmt",
-        "rgba",
+        input_pixel,
         "-s",
         f"{w}x{h}",
         "-r",
         str(fps),
         "-i",
         str(input_path),
+    ]
+    position = args.index("-i")
+    args[position:position] = [
+        "-color_primaries",
+        spec["primaries"],
+        "-color_trc",
+        spec["transfer"],
+        "-colorspace",
+        "bt2020nc" if matrix == "bt2020" else "bt709",
+        "-color_range",
+        "pc",
     ]
     if audio and info["audio"]:
         args += [
@@ -341,16 +505,16 @@ def encode_args(
         "-bufsize",
         str(bits * 2),
         "-vf",
-        "scale=iw:ih:out_color_matrix=bt709:in_range=pc:out_range=tv:"
+        f"scale=iw:ih:out_color_matrix={matrix}:in_range=pc:out_range=tv:"
         "flags=accurate_rnd+full_chroma_int:sws_dither=ed",
         "-pix_fmt",
-        "yuv420p",
+        output_pixel,
         "-color_primaries",
-        "bt709",
+        spec["primaries"],
         "-color_trc",
-        "bt709",
+        spec["transfer"],
         "-colorspace",
-        "bt709",
+        "bt2020nc" if matrix == "bt2020" else "bt709",
         "-color_range",
         "tv",
         "-movflags",
@@ -360,4 +524,31 @@ def encode_args(
         "-n",
         str(output),
     ]
+    if high:
+        args[-1:-1] = ["-tag:v", "hvc1"]
     return args
+
+
+def verify_output(path, output_format="h264"):
+    """正式发布文件前验证SPS真实10位和传递函数，失败时保留错误而非假装HDR。"""
+    spec = output_spec(output_format)
+    if spec["bits"] == 8:
+        return None
+    with Path(path).open("rb") as stream:
+        header = stream.read(4 * 1024 * 1024)
+        try:
+            sequence = sequence_info(header)
+        except ValueError:
+            stream.seek(max(0, Path(path).stat().st_size - 4 * 1024 * 1024))
+            sequence = sequence_info(stream.read())
+    info = probe(path)
+    color = info["color"]
+    if sequence["lumaBits"] != 10 or sequence["chromaBits"] != 10:
+        raise ValueError("编码器实际输出不足10位，已停止保存")
+    if (
+        not color["tagsPresent"]
+        or color["transfer"] != spec["transfer"]
+        or color["primaries"] != spec["primaries"]
+    ):
+        raise ValueError("成片色彩标记与目标不一致，已停止保存")
+    return dict(sequence, transfer=color["transfer"], primaries=color["primaries"])

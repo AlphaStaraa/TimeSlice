@@ -1,8 +1,8 @@
 {
   "name": "时刃",
-  "version": "1.0.4-quality-preview.1",
-  "displayVersion": "1.0.4 画质预览",
-  "build": 104,
+  "version": "1.0.5-hdr-preview.1",
+  "displayVersion": "1.0.5 HDR预览",
+  "build": 105,
   "author": "AlphaStar",
   "license": "AGPL-3.0-only",
   "price": 0,

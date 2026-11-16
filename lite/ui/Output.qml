@@ -8,7 +8,9 @@ ColumnLayout {
  property bool advanced:false
  spacing:16;enabled:!st.rendering
  Label {text:qsTr("输出");font.pixelSize:22;font.weight:Font.DemiBold}
- Label {text:qsTr("H.264 · SDR · MP4");color:Theme.muted;font.pixelSize:11}
+ Label {text:panel.st.settings.exportFormat==="h264"?"H.264 · 8-bit SDR · MP4":"HEVC Main10 · MP4";color:Theme.muted;font.pixelSize:11}
+ FieldRow {caption:qsTr("格式");Choice {objectName:"exportFormat";model:["H.264 · 8-bit SDR","HEVC · 10-bit SDR","HDR · PQ 10-bit","HDR · HLG 10-bit"];currentIndex:["h264","hevc10","hdr_pq","hdr_hlg"].indexOf(panel.st.settings.exportFormat);onActivated:studio.setSetting("exportFormat",["h264","hevc10","hdr_pq","hdr_hlg"][currentIndex])}}
+ Label {visible:panel.st.settings.exportFormat==="hdr_pq"||panel.st.settings.exportFormat==="hdr_hlg";text:qsTr("HDR预览以SDR映射显示，成片按所选HDR格式输出。");color:Theme.muted;font.pixelSize:11;Layout.fillWidth:true;wrapMode:Text.WordWrap}
  FieldRow {caption:qsTr("尺寸");Choice {model:[qsTr("原始尺寸"),"4K","1440p","1080p","720p"];currentIndex:Math.max(0,[0,3840,2560,1920,1280].indexOf(panel.st.settings.longEdge));onActivated:studio.setSetting("longEdge",[0,3840,2560,1920,1280][currentIndex])}}
  FieldRow {caption:qsTr("帧率");Choice {model:["24","25","30","50","60","120"];currentIndex:Math.max(0,[24,25,30,50,60,120].indexOf(panel.st.settings.fps));onActivated:studio.setSetting("fps",[24,25,30,50,60,120][currentIndex])}}
  FieldRow {caption:qsTr("码率");Choice {objectName:"exportBitrateMode";model:[qsTr("推荐"),qsTr("自定义")];currentIndex:panel.st.settings.bitrateMbps>0?1:0;onActivated:studio.setSetting("bitrateMbps",currentIndex===0?0:panel.st.recommendedBitrateMbps)}}

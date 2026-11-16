@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from media import FrameCache, check
 from model import dimensions
+from video_color import precision_required
 
 
 def source_key(info, settings, options):
@@ -26,6 +27,7 @@ def source_key(info, settings, options):
         stabilize=options["stabilize"],
         deflicker=options["deflicker"],
         algorithm=54,
+        precision=precision_required(info, settings),
     )
     return hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
 
@@ -42,7 +44,14 @@ def preview_copy(cache, folder, cancel=None, notify=lambda *_: None):
     try:
         for i in range(n):
             check(cancel)
-            data[i] = cv2.resize(cache.data[i], (w, h), interpolation=cv2.INTER_AREA)
+            if cache.meta.get("pixelFormat") == "x2rgb10le":
+                from precision_pixels import pack_rgb10, unpack_rgb10
+
+                data[i] = pack_rgb10(
+                    cv2.resize(unpack_rgb10(cache.data[i]), (w, h), interpolation=cv2.INTER_AREA)
+                )
+            else:
+                data[i] = cv2.resize(cache.data[i], (w, h), interpolation=cv2.INTER_AREA)
             if i % 12 == 0 or i == n - 1:
                 notify("更新预览", (i + 1) / n)
         data.flush()

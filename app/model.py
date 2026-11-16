@@ -89,6 +89,7 @@ DEFAULTS = dict(
     encoder="auto",
     bitrateMbps=0,
     gradientDither=True,
+    exportFormat="h264",
     smooth=False,
 )
 if MAC42:
@@ -230,6 +231,7 @@ def params(e, s, w, h, u, source_duration, frames, view=0):
         flags |= 1024
     if s.get("_exportDither", False):
         flags |= 4096
+    flags |= int(s.get("_colorFlags", 0))
     ints = [
         e["family"],
         e["shape"],
@@ -257,6 +259,10 @@ def params(e, s, w, h, u, source_duration, frames, view=0):
             sample_h,
             0,
             float(s.get("discardRatio", 0.60)) if split else 0,
+            float(s.get("_sourcePeak", 1000)),
+            203.0,
+            1000.0,
+            0.0,
         ]
         raw += np.array(shadow, dtype=np.float32).tobytes()
     return np.frombuffer(raw, dtype=np.uint8).copy()

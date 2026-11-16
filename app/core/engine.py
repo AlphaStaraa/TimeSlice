@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 from model import MAC42, ROOT, params
+from video_color import color_settings
 
 P = ctypes.c_void_p
 CInt = ctypes.c_int
@@ -22,7 +23,7 @@ class CPUEngine:
         self.lib = ctypes.CDLL(str(ROOT / "native" / name))
         self.lib.fields.argtypes = [P, CInt, CInt, CInt, CInt, P, P]
         self.lib.render_cpu.argtypes = [P, CInt, CInt, CInt, CInt, P, P, P]
-        assert self.lib.params_size() == (160 if MAC42 else 128)
+        assert self.lib.params_size() == (176 if MAC42 else 128)
         available = getattr(os, "process_cpu_count", os.cpu_count)() or 1
         self.workers = max(1, min(32, available))
         self.pool = ThreadPoolExecutor(self.workers)
@@ -46,6 +47,7 @@ class CPUEngine:
     # 按当前时间与效果生成一帧画面。
     def frame(self, cache, e, s, u, map_data=None, view=0):
         w, h = cache.width, cache.height
+        s = color_settings(cache, s)
         p = params(e, s, w, h, u, cache.duration * cache.fps, len(cache.data), view)
         out = np.empty((h, w, 4), np.uint8)
         mp = map_data.ctypes.data if map_data is not None else None
@@ -254,6 +256,7 @@ class GPUEngine:
             )
             return sample_fields(cache, self.field(p, cache.width, cache.height, map_data))
         w, h = cache.width, cache.height
+        s = color_settings(cache, s)
         p = params(e, s, w, h, u, cache.duration * cache.fps, len(cache.data), view)
         grade = getattr(cache, "live_grade", None)
         if grade is not None and grade[0]:
@@ -303,6 +306,7 @@ class GPUEngine:
         source_buffer=None,
     ):
         """对一段输出帧范围进行空间分块合成，复用实时调色方程。"""
+        s = color_settings(cache, s)
         p = params(
             e, s, cache.width, cache.height, 0, cache.duration * cache.fps, len(cache.data), view
         )
