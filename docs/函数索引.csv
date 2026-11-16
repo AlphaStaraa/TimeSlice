@@ -192,9 +192,9 @@ mac-5.0-redesign/preview_controller.py,46,PreviewController.setPreviewViewport,�
 mac-5.0-redesign/preview_controller.py,55,PreviewController.preview_size,按源宽高比计算当前视口可用的预览尺寸。
 mac-5.0-redesign/preview_controller.py,62,PreviewController.request_preview,合并预览请求，后台计算后仅采用最新版本的结果。
 mac-5.0-redesign/preview_controller.py,85,PreviewController.request_preview.work,在线程池中执行耗时工作，并向界面线程投递结果或异常。
-mac-5.0-redesign/preview_render.py,12,PreviewRenderer.__init__,建立对象所需的状态、资源句柄和默认配置。
-mac-5.0-redesign/preview_render.py,17,PreviewRenderer.close,关闭当前对象持有的资源，避免重复占用文件、线程或设备。
-mac-5.0-redesign/preview_render.py,24,PreviewRenderer.frame,按当前时间与效果生成一帧画面。
+mac-5.0-redesign/preview_render.py,13,PreviewRenderer.__init__,建立对象所需的状态、资源句柄和默认配置。
+mac-5.0-redesign/preview_render.py,18,PreviewRenderer.close,关闭当前对象持有的资源，避免重复占用文件、线程或设备。
+mac-5.0-redesign/preview_render.py,25,PreviewRenderer.frame,按当前时间与效果生成一帧画面。
 mac-5.0-redesign/processed_render.py,22,ProcessedRenderJob.__init__,保存调色配置和缓存描述，导出时再核对文件身份及输出条件。
 mac-5.0-redesign/processed_render.py,34,ProcessedRenderJob.prepare_cache,优先借用全分辨率处理缓存；调色交给 CPU/Metal 合成器实时执行。
 mac-5.0-redesign/progress_estimator.py,7,ProgressEstimator.__init__,初始化估算器；尚未取得有效速率时不显示虚假的精确秒数。

@@ -27,9 +27,9 @@
 
 | 平台 | 当前版本 | 要求 |
 | --- | --- | --- |
-| Mac完整版 | 1.0.6 | Apple Silicon、macOS14+ |
-| Mac Lite | 1.0.6-lite.1 | Apple Silicon、macOS14+ |
-| Windows | 1.0.6-hdr-preview.1 | Windows10 22H2 / 11，x64 |
+| Mac完整版 | 1.0.7 | Apple Silicon、macOS14+ |
+| Mac Lite | 1.0.7-lite.1 | Apple Silicon、macOS14+ |
+| Windows | 1.0.7-preview.1 | Windows10 22H2 / 11，x64 |
 | Android | 1.0.5-hdr-preview.1 | 8位Android10+；10位/HDR需Android13+及P010支持 |
 
 完整解压后启动软件，导入视频，选择效果。**首次导出时自行选择保存目录**。Android可保存到相册或自选目录。

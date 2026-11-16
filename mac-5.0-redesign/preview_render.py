@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 import numpy as np
 from model import params
+from video_color import color_settings
 
 
 class PreviewRenderer:
@@ -25,6 +26,8 @@ class PreviewRenderer:
         w, h = size
         n = len(cache.data)
         sw, sh = cache.width, cache.height
+        # 源纹理按真实RGB10/PQ/HLG解读，视口始终输出可显示的SDR RGBA8。
+        s = color_settings(cache, dict(s, _exportFormat="h264"))
         p = params(e, s, w, h, u, cache.duration * cache.fps, n, view)
         out = np.empty((h, w, 4), np.uint8)
         if engine.kind == "cpu":
